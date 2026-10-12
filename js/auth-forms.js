@@ -22,6 +22,17 @@
     });
   });
 
+  // Coming back to sign in or sign up ends any demo in this tab.
+  window.PassovaDemo.stop();
+
+  var demoBtn = document.getElementById("demo-btn");
+  if (demoBtn) {
+    demoBtn.addEventListener("click", function () {
+      window.PassovaDemo.start();
+      window.location.href = "home.html";
+    });
+  }
+
   var errorBox = document.getElementById("form-error");
 
   function showError(message) {

@@ -4,7 +4,10 @@
   "use strict";
 
   var config = window.PASSOVA_CONFIG;
-  var db = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
+  var demo = !!(window.PassovaDemo && window.PassovaDemo.active());
+  var db = demo
+    ? window.PassovaDemo.createClient()
+    : window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
 
   // ---------- Kuwait time and shifts ----------
 
@@ -264,6 +267,15 @@
     ]);
 
     document.body.insertBefore(header, document.body.firstChild);
+    if (demo) {
+      var exit = el("button", { type: "button", class: "demo-exit", text: "Exit demo" });
+      exit.addEventListener("click", signOut);
+      document.body.insertBefore(el("div", { class: "demo-bar", role: "note" }, [
+        el("span", { class: "demo-dot" }),
+        el("span", null, [el("strong", { text: "Demo mode" }), " · sample patients; nothing is saved to the real database."]),
+        exit,
+      ]), document.body.firstChild);
+    }
     document.body.insertBefore(drawer, document.body.firstChild);
     document.body.insertBefore(scrim, document.body.firstChild);
 
@@ -531,6 +543,7 @@
     renderShell: renderShell,
     fillDrawerUser: fillDrawerUser,
     signOut: signOut,
+    isDemo: demo,
     loadProfiles: loadProfiles,
     profiles: profiles,
     me: function () { return me; },
