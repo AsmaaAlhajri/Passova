@@ -25,7 +25,7 @@
       </div>
 
       <ul class="brand-points">
-        <li>Structured shift endorsements</li>
+        <li>I-PASS shift endorsements</li>
         <li>Pending orders with timed reminders</li>
         <li>New admissions at a glance</li>
       </ul>
@@ -42,32 +42,32 @@
         <p class="lead">Welcome back. Sign in to start your shift.</p>
       </div>
 
-      <form class="login-form" id="login-form" autocomplete="off" novalidate>
+      <form class="login-form" id="login-form" novalidate>
         <div class="field">
           <label for="email">Email</label>
-          <input class="input" id="email" name="email" type="text" inputmode="email" placeholder="name@hospital.kw" autocomplete="off" required>
+          <input class="input" id="email" name="email" type="email" inputmode="email" placeholder="name@hospital.kw" autocomplete="username" required>
         </div>
 
         <div class="field">
           <label for="password">Password</label>
           <div class="password-wrap">
-            <input class="input" id="password" name="password" type="password" placeholder="Enter your password" autocomplete="off" required>
-            <button class="password-toggle" type="button" id="password-toggle" aria-label="Show password" aria-pressed="false">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
+            <input class="input" id="password" name="password" type="password" placeholder="Enter your password" autocomplete="current-password" required>
+            <button class="password-toggle" type="button" data-toggle-for="password" aria-label="Show password" aria-pressed="false"></button>
           </div>
         </div>
 
-        <button class="btn btn-primary" type="submit">Sign in</button>
+        <p class="form-error" id="form-error" role="alert" hidden></p>
 
-        <p class="demo-note">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-          <span>Demo access: any email and password will let you in. Nothing you type here is saved.</span>
-        </p>
+        <button class="btn btn-primary" type="submit" id="submit">Sign in</button>
+
+        <p class="form-switch">New to Passova? <a href="signup.html">Create an account</a></p>
       </form>
     </section>
   </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/auth-forms.js"></script>
   <script src="js/login.js"></script>
 </body>
 </html>

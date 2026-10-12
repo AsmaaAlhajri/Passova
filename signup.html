@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Create account · Passova</title>
+  <meta name="description" content="Create your Passova account.">
+  <link rel="icon" href="assets/passova-logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="login-body">
+  <main class="login-shell">
+    <section class="login-brand" aria-label="About Passova">
+      <div class="brand-lockup">
+        <img src="assets/passova-logo.svg" alt="">
+        <span class="brand-name">PASSOVA</span>
+      </div>
+
+      <div>
+        <h1>One account for<br>every doctor.</h1>
+        <p>Your name appears on every patient you endorse or admit, and on every patient you mark as seen.</p>
+      </div>
+
+      <ul class="brand-points">
+        <li>Endorse patients to the on-call team</li>
+        <li>Add new admissions during the on-call</li>
+        <li>Track who saw each patient, and when</li>
+      </ul>
+    </section>
+
+    <section class="login-form-wrap" aria-labelledby="signup-title">
+      <div class="login-hospital">
+        <img src="assets/jaber-alahmad-logo.png" alt="Jaber Al-Ahmad Hospital">
+        <span>Jaber Al-Ahmad Hospital</span>
+      </div>
+
+      <div>
+        <h2 id="signup-title">Create your account</h2>
+        <p class="lead">It takes a minute. You can change these details later in My profile.</p>
+      </div>
+
+      <form class="login-form" id="signup-form" novalidate>
+        <div class="field">
+          <label for="full-name">Full name</label>
+          <input class="input" id="full-name" type="text" placeholder="e.g. Reem Al-Saleh" autocomplete="name" maxlength="120" required>
+        </div>
+
+        <div class="dialog-row">
+          <div class="field">
+            <label for="position">Position <span class="optional">(optional)</span></label>
+            <select class="input" id="position">
+              <option value="">Choose…</option>
+              <option>Intern</option>
+              <option>Resident</option>
+              <option>Registrar</option>
+              <option>Specialist</option>
+              <option>Senior Specialist</option>
+              <option>Consultant</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="team">Team <span class="optional">(optional)</span></label>
+            <select class="input" id="team">
+              <option value="">Choose…</option>
+              <option value="1">Team 1</option>
+              <option value="2">Team 2</option>
+              <option value="3">Team 3</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input class="input" id="email" type="email" inputmode="email" placeholder="name@hospital.kw" autocomplete="email" required>
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="password-wrap">
+            <input class="input" id="password" type="password" placeholder="At least 8 characters" autocomplete="new-password" minlength="8" required>
+            <button class="password-toggle" type="button" data-toggle-for="password" aria-label="Show password" aria-pressed="false"></button>
+          </div>
+        </div>
+
+        <p class="form-error" id="form-error" role="alert" hidden></p>
+        <p class="form-success" id="form-success" role="status" hidden></p>
+
+        <button class="btn btn-primary" type="submit" id="submit">Create account</button>
+
+        <p class="form-switch">Already have an account? <a href="index.html">Sign in</a></p>
+      </form>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/auth-forms.js"></script>
+  <script src="js/signup.js"></script>
+</body>
+</html>

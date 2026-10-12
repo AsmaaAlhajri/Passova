@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>New admissions · Passova</title>
+  <meta name="description" content="Patients admitted during the on-call.">
+  <link rel="icon" href="assets/passova-logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="app-body auth-pending">
+
+  <main class="page">
+    <div class="page-head">
+      <div>
+        <h1 class="page-title">New admissions</h1>
+        <p class="section-sub">Patients admitted to the hospital during this on-call.</p>
+      </div>
+      <button class="btn btn-primary" type="button" id="open-form" aria-controls="admit-form-card" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        Add a new patient
+      </button>
+    </div>
+
+    <section class="card form-card" id="admit-form-card" aria-labelledby="form-title" hidden>
+      <form id="admit-form" novalidate>
+        <div class="form-card-head">
+          <h2 class="section-title" id="form-title">New admission</h2>
+          <p class="section-sub">The patient is added as <strong>Not seen</strong>. Your name and the time are added automatically.</p>
+        </div>
+
+        <fieldset class="form-block">
+          <legend class="block-title">Patient</legend>
+          <div class="form-grid">
+            <div class="field">
+              <label for="ward">Ward *</label>
+              <input class="input" id="ward" type="text" maxlength="20" placeholder="e.g. W1" required>
+            </div>
+            <div class="field">
+              <label for="room">Room *</label>
+              <input class="input" id="room" type="text" maxlength="20" placeholder="e.g. R2B" required>
+            </div>
+            <div class="field span-2">
+              <label for="patient-name">Patient name *</label>
+              <input class="input" id="patient-name" type="text" maxlength="120" required>
+            </div>
+            <div class="field">
+              <label for="age">Age *</label>
+              <input class="input" id="age" type="number" min="0" max="130" inputmode="numeric" required>
+            </div>
+            <div class="field span-3">
+              <label for="diagnosis">Diagnosis *</label>
+              <input class="input" id="diagnosis" type="text" maxlength="300" required>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="form-block">
+          <legend class="block-title">Condition *</legend>
+          <div class="severity-options" role="radiogroup" aria-label="Condition">
+            <label class="severity-option">
+              <input type="radio" name="condition" value="stable" required>
+              <span><strong>Stable</strong><small>Not expected to deteriorate</small></span>
+            </label>
+            <label class="severity-option">
+              <input type="radio" name="condition" value="watcher">
+              <span><strong>Watcher</strong><small>Potential to deteriorate</small></span>
+            </label>
+            <label class="severity-option">
+              <input type="radio" name="condition" value="unstable">
+              <span><strong>Unstable</strong><small>Needs close attention now</small></span>
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset class="form-block">
+          <legend class="block-title">Pending orders <span class="optional">(optional)</span></legend>
+          <p class="block-hint">Each one shows on the home page as a pending order and a reminder.</p>
+          <div id="action-editor"></div>
+        </fieldset>
+
+        <p class="form-error" id="form-error" role="alert" hidden></p>
+
+        <div class="form-actions">
+          <button class="btn btn-ghost" type="button" id="cancel-form">Cancel</button>
+          <button class="btn btn-primary" type="submit" id="submit-form">Add patient</button>
+        </div>
+      </form>
+    </section>
+
+    <section aria-labelledby="list-title">
+      <div class="table-head">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title" id="list-title">Admitted this on-call</h2>
+            <p class="section-sub">Tap a patient's status to update it. A patient marked as seen stays seen.</p>
+          </div>
+        </div>
+        <div class="orders-head" aria-hidden="true">Pending orders</div>
+      </div>
+      <div class="table-head table-cols" aria-hidden="true">
+        <div class="table-head-cols">
+          <span>#</span><span>Location</span><span>Name</span><span>Age</span><span>Diagnosis</span><span>Condition</span><span>Status</span>
+        </div>
+      </div>
+      <ul class="rows admit" id="admit-rows"></ul>
+
+      <div class="total">
+        Total admissions:
+        <span class="total-box" id="admit-total">0</span>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/core.js"></script>
+  <script src="js/board.js"></script>
+  <script src="js/admissions.js"></script>
+</body>
+</html>

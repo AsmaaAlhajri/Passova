@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Endorsement · Passova</title>
+  <meta name="description" content="Endorse patients to the on-call team using I-PASS.">
+  <link rel="icon" href="assets/passova-logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="app-body auth-pending">
+
+  <main class="page">
+    <div class="page-head">
+      <div>
+        <h1 class="page-title">Endorsement</h1>
+        <p class="section-sub">Hand a patient over to the on-call team using I-PASS.</p>
+      </div>
+      <button class="btn btn-primary" type="button" id="open-form" aria-controls="endorse-form-card" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        Endorse a patient
+      </button>
+    </div>
+
+    <!-- New endorsement (I-PASS) -->
+    <section class="card form-card" id="endorse-form-card" aria-labelledby="form-title" hidden>
+      <form id="endorse-form" novalidate>
+        <div class="form-card-head">
+          <h2 class="section-title" id="form-title">New endorsement</h2>
+          <p class="section-sub">Fields marked * are required. Your name and the time are added automatically.</p>
+        </div>
+
+        <fieldset class="form-block">
+          <legend class="block-title">Patient and location</legend>
+          <div class="form-grid">
+            <div class="field span-2">
+              <label for="patient-name">Patient name *</label>
+              <input class="input" id="patient-name" type="text" maxlength="120" required>
+            </div>
+            <div class="field">
+              <label for="age">Age</label>
+              <input class="input" id="age" type="number" min="0" max="130" inputmode="numeric">
+            </div>
+            <div class="field">
+              <label for="gender">Gender</label>
+              <select class="input" id="gender">
+                <option value="">—</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="ward">Ward *</label>
+              <input class="input" id="ward" type="text" maxlength="20" placeholder="e.g. W1" required>
+            </div>
+            <div class="field">
+              <label for="room">Room *</label>
+              <input class="input" id="room" type="text" maxlength="20" placeholder="e.g. R2B" required>
+            </div>
+            <div class="field span-2">
+              <label for="team">Patient is under *</label>
+              <select class="input" id="team" required>
+                <option value="">Choose a team…</option>
+                <option value="1">Team 1</option>
+                <option value="2">Team 2</option>
+                <option value="3">Team 3</option>
+              </select>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="form-block ipass">
+          <legend class="block-title"><span class="ipass-letter">I</span>Illness severity *</legend>
+          <div class="severity-options" role="radiogroup" aria-label="Illness severity">
+            <label class="severity-option">
+              <input type="radio" name="severity" value="stable" required>
+              <span><strong>Stable</strong><small>Not expected to deteriorate</small></span>
+            </label>
+            <label class="severity-option">
+              <input type="radio" name="severity" value="watcher">
+              <span><strong>Watcher</strong><small>Potential to become critical</small></span>
+            </label>
+            <label class="severity-option">
+              <input type="radio" name="severity" value="star">
+              <span><strong>STAR</strong><small>Ongoing resuscitation</small></span>
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset class="form-block ipass">
+          <legend class="block-title"><span class="ipass-letter">P</span>Patient summary</legend>
+          <div class="field">
+            <label for="working-diagnosis">Working differential diagnosis *</label>
+            <input class="input" id="working-diagnosis" type="text" maxlength="300" required>
+          </div>
+          <div class="field">
+            <label for="summary">Brief overview</label>
+            <textarea class="input" id="summary" rows="5" maxlength="4000" placeholder="Age, gender, relevant PMH/PSH · CC, significant signs and symptoms, time frame · relevant ROS and exam findings · known diagnostic results · interventions given (incl. IV access) · consults made"></textarea>
+          </div>
+          <div class="form-grid two">
+            <div class="field">
+              <label for="ongoing-assessment">Ongoing assessment</label>
+              <textarea class="input" id="ongoing-assessment" rows="3" maxlength="2000"></textarea>
+            </div>
+            <div class="field">
+              <label for="plan">Suggested plan</label>
+              <textarea class="input" id="plan" rows="3" maxlength="2000"></textarea>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="form-block ipass">
+          <legend class="block-title"><span class="ipass-letter">A</span>Action list</legend>
+          <p class="block-hint">Pending studies, treatments, exams, consults and procedures. Each one becomes a pending order and a reminder on the home page; add a time to have it pop up when due.</p>
+          <div id="action-editor"></div>
+        </fieldset>
+
+        <fieldset class="form-block ipass">
+          <legend class="block-title"><span class="ipass-letter">S</span>Suggestions</legend>
+          <div class="field">
+            <label for="suggestions">If / then</label>
+            <textarea class="input" id="suggestions" rows="3" maxlength="2000" placeholder="Working disposition, possible scenarios and what to do, e.g. If SpO2 &lt; 92% then start O2 and call the registrar."></textarea>
+          </div>
+        </fieldset>
+
+        <div class="form-block ipass muted-block">
+          <p class="block-title"><span class="ipass-letter">S</span>Synthesis by receiver</p>
+          <p class="block-hint">Completed by the on-call doctor after the handover, on the patient's card below.</p>
+        </div>
+
+        <p class="form-error" id="form-error" role="alert" hidden></p>
+
+        <div class="form-actions">
+          <button class="btn btn-ghost" type="button" id="cancel-form">Cancel</button>
+          <button class="btn btn-primary" type="submit" id="submit-form">Submit endorsement</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Endorsed patients -->
+    <section aria-labelledby="list-title">
+      <div class="list-head">
+        <h2 class="section-title" id="list-title">This shift <span class="count-pill" id="endorse-count">0</span></h2>
+        <div class="filter" role="group" aria-label="Show patients under">
+          <button type="button" class="filter-btn is-active" data-team="">All teams</button>
+          <button type="button" class="filter-btn" data-team="1">Team 1</button>
+          <button type="button" class="filter-btn" data-team="2">Team 2</button>
+          <button type="button" class="filter-btn" data-team="3">Team 3</button>
+        </div>
+      </div>
+      <div class="endorse-list" id="endorse-list"></div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/core.js"></script>
+  <script src="js/board.js"></script>
+  <script src="js/endorsement.js"></script>
+</body>
+</html>

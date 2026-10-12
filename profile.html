@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My profile · Passova</title>
+  <meta name="description" content="Your Passova profile.">
+  <link rel="icon" href="assets/passova-logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="app-body auth-pending">
+
+  <main class="page narrow">
+    <div class="page-head">
+      <div>
+        <h1 class="page-title">My profile</h1>
+        <p class="section-sub">This is how your name appears on endorsements, admissions and patients you mark as seen.</p>
+      </div>
+    </div>
+
+    <section class="card profile-card" aria-labelledby="profile-name">
+      <div class="profile-hero">
+        <span class="profile-avatar" id="profile-avatar">?</span>
+        <div>
+          <h2 class="profile-name" id="profile-name">&nbsp;</h2>
+          <p class="muted" id="profile-email">&nbsp;</p>
+        </div>
+      </div>
+
+      <form id="profile-form" class="profile-form" novalidate>
+        <div class="field">
+          <label for="full-name">Full name *</label>
+          <div class="input-prefix">
+            <span aria-hidden="true">Dr.</span>
+            <input class="input" id="full-name" type="text" maxlength="120" autocomplete="name" required>
+          </div>
+        </div>
+
+        <div class="dialog-row">
+          <div class="field">
+            <label for="position">Position</label>
+            <select class="input" id="position">
+              <option value="">Not set</option>
+              <option>Intern</option>
+              <option>Resident</option>
+              <option>Registrar</option>
+              <option>Specialist</option>
+              <option>Senior Specialist</option>
+              <option>Consultant</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="team">Team</label>
+            <select class="input" id="team">
+              <option value="">Not set</option>
+              <option value="1">Team 1</option>
+              <option value="2">Team 2</option>
+              <option value="3">Team 3</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="phone">Phone / pager <span class="optional">(optional)</span></label>
+          <input class="input" id="phone" type="tel" maxlength="30" autocomplete="tel">
+        </div>
+
+        <p class="form-error" id="form-error" role="alert" hidden></p>
+
+        <div class="form-actions">
+          <button class="btn btn-ghost" type="button" id="sign-out">Sign out</button>
+          <button class="btn btn-primary" type="submit" id="save">Save changes</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/core.js"></script>
+  <script src="js/profile.js"></script>
+</body>
+</html>
