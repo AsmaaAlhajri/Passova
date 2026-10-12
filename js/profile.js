@@ -72,8 +72,6 @@
       });
   });
 
-  document.getElementById("sign-out").addEventListener("click", P.signOut);
-
   P.requireAuth().then(function (session) {
     me = session;
     P.fillDrawerUser();

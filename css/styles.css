@@ -2474,3 +2474,9 @@ textarea.input {
 .demo-exit:hover {
   background: rgba(255, 255, 255, 0.12);
 }
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

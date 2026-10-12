@@ -144,11 +144,19 @@
     <section aria-labelledby="list-title">
       <div class="list-head">
         <h2 class="section-title" id="list-title">This shift <span class="count-pill" id="endorse-count">0</span></h2>
-        <div class="filter" role="group" aria-label="Show patients under">
-          <button type="button" class="filter-btn is-active" data-team="">All teams</button>
-          <button type="button" class="filter-btn" data-team="1">Team 1</button>
-          <button type="button" class="filter-btn" data-team="2">Team 2</button>
-          <button type="button" class="filter-btn" data-team="3">Team 3</button>
+        <div class="filters">
+          <div class="filter" role="group" aria-label="Show patients under">
+            <button type="button" class="filter-btn is-active" data-filter="team" data-value="" aria-pressed="true">All teams</button>
+            <button type="button" class="filter-btn" data-filter="team" data-value="1" aria-pressed="false">Team 1</button>
+            <button type="button" class="filter-btn" data-filter="team" data-value="2" aria-pressed="false">Team 2</button>
+            <button type="button" class="filter-btn" data-filter="team" data-value="3" aria-pressed="false">Team 3</button>
+          </div>
+          <div class="filter" role="group" aria-label="Show illness severity">
+            <button type="button" class="filter-btn is-active" data-filter="severity" data-value="" aria-pressed="true">All severities</button>
+            <button type="button" class="filter-btn" data-filter="severity" data-value="stable" aria-pressed="false">Stable</button>
+            <button type="button" class="filter-btn" data-filter="severity" data-value="watcher" aria-pressed="false">Watcher</button>
+            <button type="button" class="filter-btn" data-filter="severity" data-value="star" aria-pressed="false">STAR</button>
+          </div>
         </div>
       </div>
       <div class="endorse-list" id="endorse-list"></div>

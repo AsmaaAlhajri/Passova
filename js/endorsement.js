@@ -6,7 +6,7 @@
   var P = window.Passova;
   var el = P.el;
   var board = null;
-  var teamFilter = "";
+  var filters = { team: "", severity: "" };
   var me = null;
 
   P.renderShell("endorsement");
@@ -118,16 +118,29 @@
 
   // ---------- Filter ----------
 
+  // Two filters that combine: the team the patient is under, and illness
+  // severity.
   document.querySelectorAll(".filter-btn").forEach(function (btn) {
     btn.addEventListener("click", function () {
-      teamFilter = btn.getAttribute("data-team");
-      document.querySelectorAll(".filter-btn").forEach(function (b) {
+      var kind = btn.getAttribute("data-filter");
+      filters[kind] = btn.getAttribute("data-value");
+      document.querySelectorAll('.filter-btn[data-filter="' + kind + '"]').forEach(function (b) {
         b.classList.toggle("is-active", b === btn);
         b.setAttribute("aria-pressed", String(b === btn));
       });
       render();
     });
   });
+
+  function emptyMessage() {
+    var parts = [];
+    if (filters.severity) parts.push(P.SEVERITY[filters.severity]);
+    parts.push("patients");
+    if (filters.team) parts.push("under Team " + filters.team);
+    return filters.team || filters.severity
+      ? "No " + parts.join(" ") + " have been endorsed this shift."
+      : "No patients endorsed yet this shift.";
+  }
 
   // ---------- List ----------
 
@@ -276,15 +289,14 @@
     P.closePop();
     var list = document.getElementById("endorse-list");
     var rows = board.endorsements.filter(function (p) {
-      return !teamFilter || String(p.team) === teamFilter;
+      return (!filters.team || String(p.team) === filters.team) &&
+        (!filters.severity || p.severity === filters.severity);
     });
     document.getElementById("endorse-count").textContent = rows.length;
     list.textContent = "";
     rows.forEach(function (p) { list.appendChild(endorsementCard(p)); });
     if (!rows.length) {
-      list.appendChild(el("p", { class: "rows-empty", text: teamFilter
-        ? "No patients under Team " + teamFilter + " have been endorsed this shift."
-        : "No patients endorsed yet this shift." }));
+      list.appendChild(el("p", { class: "rows-empty", text: emptyMessage() }));
     }
   }
 
