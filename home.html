@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Home · Passova</title>
+  <meta name="description" content="Passova home — reminders, endorsement preview, new admissions and pending orders.">
+  <link rel="icon" href="assets/passova-logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="app-body">
+
+  <!-- Side menu -->
+  <div class="scrim" id="scrim"></div>
+  <aside class="drawer" id="drawer" aria-label="Main menu" aria-hidden="true">
+    <div class="drawer-head">
+      <div class="brand-lockup">
+        <img src="assets/passova-logo.svg" alt="">
+        <span class="brand-name">PASSOVA</span>
+      </div>
+      <button class="drawer-close" type="button" id="menu-close" aria-label="Close menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <nav>
+      <a href="home.html" aria-current="page">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z"/></svg>
+        Home
+      </a>
+      <a href="#reminders">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg>
+        Reminders
+      </a>
+      <a href="#endorsement">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3H7l-4 4v13a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1h-3M9 3h6v4H9zM8 12h8M8 16h5"/></svg>
+        Endorsement
+      </a>
+      <a href="#admissions">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM19 8v6M22 11h-6"/></svg>
+        New admissions
+      </a>
+      <a href="#endorsement">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg>
+        Pending orders
+      </a>
+    </nav>
+
+    <div class="drawer-foot">
+      <a href="index.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+        Sign out
+      </a>
+    </div>
+  </aside>
+
+  <!-- Top bar: menu · hospital logo · date, time and on-call team -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="menu-btn" type="button" id="menu-open" aria-controls="drawer" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        <span>Menu</span>
+      </button>
+      <div class="app-mark">
+        <img src="assets/passova-logo.svg" alt="Passova">
+        <span>PASSOVA</span>
+      </div>
+    </div>
+
+    <div class="hospital-logo">
+      <img src="assets/jaber-alahmad-logo.png" alt="Jaber Al-Ahmad Hospital">
+    </div>
+
+    <div class="topbar-right">
+      <div>
+        <div class="clock-time" id="clock-time" aria-live="off">--:--:--</div>
+        <div class="clock-date"><span id="clock-date">&nbsp;</span><span class="clock-zone">Kuwait</span></div>
+      </div>
+      <label class="oncall">
+        Team on-call
+        <select id="oncall-team" aria-label="Team on-call">
+          <option>1</option>
+          <option>2</option>
+          <option>3</option>
+          <option>4</option>
+        </select>
+      </label>
+    </div>
+  </header>
+
+  <main class="home">
+
+    <!-- Reminders -->
+    <section class="split" id="reminders" aria-labelledby="reminders-title">
+      <div>
+        <div class="section-head">
+          <div>
+            <h2 class="section-title" id="reminders-title">Reminders <span class="count-pill" id="reminder-count">0</span></h2>
+            <p class="section-sub">Pending orders appear here automatically, and pop up when they fall due.</p>
+          </div>
+        </div>
+
+        <div class="card reminders">
+          <ul class="reminder-list" id="reminder-list"></ul>
+          <p class="reminders-empty" id="reminders-empty" hidden>No active reminders. You are all caught up.</p>
+
+          <div class="reminders-footer">
+            <button class="btn btn-primary" type="button" id="add-reminder">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+              Add a reminder
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Endorsement preview + pending orders -->
+    <section id="endorsement" aria-labelledby="endorsement-title">
+      <div class="table-head">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title" id="endorsement-title">Endorsement preview</h2>
+            <p class="section-sub">Patients handed over to your team this shift.</p>
+          </div>
+        </div>
+        <div class="orders-head" aria-hidden="true">Pending orders</div>
+      </div>
+      <ul class="rows endorse" id="endorse-rows"></ul>
+    </section>
+
+    <!-- New admissions + pending orders -->
+    <section id="admissions" aria-labelledby="admissions-title">
+      <div class="table-head">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title" id="admissions-title">New admissions</h2>
+            <p class="section-sub">Admitted to your team since the start of the shift.</p>
+          </div>
+        </div>
+        <div class="orders-head" aria-hidden="true">Pending orders</div>
+      </div>
+      <div class="table-head table-cols" aria-hidden="true">
+        <div class="table-head-cols">
+          <span>#</span><span>Bed</span><span>Name</span><span>Age</span><span>Diagnosis</span><span>Status</span>
+        </div>
+      </div>
+      <ul class="rows admit" id="admit-rows"></ul>
+
+      <div class="total">
+        Total admissions:
+        <span class="total-box" id="admit-total">0</span>
+      </div>
+    </section>
+
+    <ul class="legend" aria-label="Status colours">
+      <li><span class="swatch status-not-seen"></span>Not seen</li>
+      <li><span class="swatch status-reassess"></span>For reassessment</li>
+      <li><span class="swatch status-seen"></span>Seen</li>
+    </ul>
+
+    <p class="footer-note">Demo data only. Nothing on this page is saved: reminders you add are cleared when the page is closed or refreshed.</p>
+  </main>
+
+  <!-- Add reminder dialog -->
+  <dialog class="dialog" id="reminder-dialog" aria-labelledby="dialog-title">
+    <form method="dialog" id="reminder-form">
+      <h2 id="dialog-title">Add a reminder</h2>
+      <p class="hint">Leave the time empty for a reminder that stays until you mark it done.</p>
+
+      <div class="field">
+        <label for="reminder-text">Reminder</label>
+        <input class="input" id="reminder-text" type="text" maxlength="120" placeholder="e.g. Call radiology about CT chest" required>
+      </div>
+
+      <div class="dialog-row">
+        <div class="field">
+          <label for="reminder-bed">Patient <span class="optional">(optional)</span></label>
+          <select class="input" id="reminder-bed"></select>
+        </div>
+        <div class="field">
+          <label for="reminder-time">Time <span class="optional">(optional)</span></label>
+          <input class="input" id="reminder-time" type="time">
+        </div>
+      </div>
+
+      <div class="dialog-actions">
+        <button class="btn btn-ghost" type="button" id="reminder-cancel">Cancel</button>
+        <button class="btn btn-primary" type="submit" value="save">Add reminder</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+
+  <script src="js/home.js"></script>
+</body>
+</html>

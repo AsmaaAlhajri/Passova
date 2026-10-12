@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Passova">
+  <rect width="64" height="64" rx="18" fill="#ffffff"/>
+  <g fill="none" stroke="#2B59C3" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M45 24H19M26 17l-7 7 7 7"/>
+    <path d="M19 40h26M38 33l7 7-7 7"/>
+  </g>
+</svg>

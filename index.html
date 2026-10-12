@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in · Passova</title>
+  <meta name="description" content="Passova — passing information, connecting care.">
+  <link rel="icon" href="assets/passova-logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="login-body">
+  <main class="login-shell">
+    <section class="login-brand" aria-label="About Passova">
+      <div class="brand-lockup">
+        <img src="assets/passova-logo.svg" alt="">
+        <span class="brand-name">PASSOVA</span>
+      </div>
+
+      <div>
+        <h1>Passing Information.<br>Connecting Care.</h1>
+        <p>A smarter way to hand over patients, communicate clinical priorities, and ensure continuity of care across every shift.</p>
+      </div>
+
+      <ul class="brand-points">
+        <li>Structured shift endorsements</li>
+        <li>Pending orders with timed reminders</li>
+        <li>New admissions at a glance</li>
+      </ul>
+    </section>
+
+    <section class="login-form-wrap" aria-labelledby="signin-title">
+      <div class="login-hospital">
+        <img src="assets/jaber-alahmad-logo.png" alt="Jaber Al-Ahmad Hospital">
+        <span>Jaber Al-Ahmad Hospital</span>
+      </div>
+
+      <div>
+        <h2 id="signin-title">Sign in</h2>
+        <p class="lead">Welcome back. Sign in to start your shift.</p>
+      </div>
+
+      <form class="login-form" id="login-form" autocomplete="off" novalidate>
+        <div class="field">
+          <label for="email">Email</label>
+          <input class="input" id="email" name="email" type="text" inputmode="email" placeholder="name@hospital.kw" autocomplete="off" required>
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="password-wrap">
+            <input class="input" id="password" name="password" type="password" placeholder="Enter your password" autocomplete="off" required>
+            <button class="password-toggle" type="button" id="password-toggle" aria-label="Show password" aria-pressed="false">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" type="submit">Sign in</button>
+
+        <p class="demo-note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          <span>Demo access: any email and password will let you in. Nothing you type here is saved.</span>
+        </p>
+      </form>
+    </section>
+  </main>
+
+  <script src="js/login.js"></script>
+</body>
+</html>
