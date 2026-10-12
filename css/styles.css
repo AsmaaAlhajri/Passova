@@ -903,6 +903,80 @@ button {
   color: var(--status-seen);
 }
 
+.status-chip.is-button {
+  border: 0;
+  font-family: inherit;
+  cursor: pointer;
+  transition: box-shadow 0.15s ease;
+}
+
+.status-chip.is-button:hover,
+.status-chip.is-button[aria-expanded="true"] {
+  box-shadow: 0 0 0 2px rgba(47, 138, 91, 0.3);
+}
+
+/* "Seen by" window */
+.seen-pop {
+  position: fixed;
+  z-index: 30;
+  width: 280px;
+  max-width: calc(100vw - 32px);
+  padding: 14px 16px;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  background: var(--white);
+  box-shadow: var(--shadow-lg);
+  animation: pop-in 0.18s ease;
+}
+
+.seen-pop[hidden] {
+  display: none;
+}
+
+.seen-pop p {
+  margin: 0;
+}
+
+.seen-pop-label {
+  margin-bottom: 10px !important;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--status-seen);
+}
+
+.seen-pop-doctor {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.seen-pop-avatar {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--purple-soft);
+  color: var(--purple-deep);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.seen-pop-name {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.seen-pop-time {
+  font-size: 12.5px;
+  color: var(--gray-400);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 /* Admissions rows */
 .admit .row-main {
   grid-template-columns: 44px 92px minmax(0, 1.4fr) 64px minmax(0, 1.6fr) 176px;
@@ -1032,41 +1106,6 @@ button {
   border-color: var(--gray-200);
   color: var(--gray-500);
   font-weight: 500;
-}
-
-/* ---------- Legend ---------- */
-
-.legend {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px 24px;
-  margin: 4px 0 0;
-  padding: 14px 18px;
-  list-style: none;
-  border-radius: var(--radius);
-  background: var(--white);
-  border: 1px solid var(--gray-200);
-  font-size: 13px;
-  color: var(--gray-700);
-}
-
-.legend li {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.legend .swatch {
-  width: 14px;
-  height: 14px;
-  border-radius: 4px;
-}
-
-.footer-note {
-  text-align: center;
-  font-size: 12px;
-  color: var(--gray-400);
 }
 
 /* ---------- Side menu ---------- */

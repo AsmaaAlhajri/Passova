@@ -154,15 +154,19 @@
         <span class="total-box" id="admit-total">0</span>
       </div>
     </section>
-
-    <ul class="legend" aria-label="Status colours">
-      <li><span class="swatch status-not-seen"></span>Not seen</li>
-      <li><span class="swatch status-reassess"></span>For reassessment</li>
-      <li><span class="swatch status-seen"></span>Seen</li>
-    </ul>
-
-    <p class="footer-note">Demo data only. Nothing on this page is saved: reminders you add are cleared when the page is closed or refreshed.</p>
   </main>
+
+  <!-- "Seen by" window, opened from a Seen status chip -->
+  <div class="seen-pop" id="seen-pop" role="dialog" aria-labelledby="seen-pop-title" hidden>
+    <p class="seen-pop-label" id="seen-pop-title">Seen by</p>
+    <div class="seen-pop-doctor">
+      <span class="seen-pop-avatar" id="seen-pop-avatar"></span>
+      <div>
+        <p class="seen-pop-name" id="seen-pop-name"></p>
+        <p class="seen-pop-time" id="seen-pop-time"></p>
+      </div>
+    </div>
+  </div>
 
   <!-- Add reminder dialog -->
   <dialog class="dialog" id="reminder-dialog" aria-labelledby="dialog-title">

@@ -50,6 +50,11 @@
     return ((t % DAY) + DAY) % DAY;
   }
 
+  // A moment `minutes` ago, to the second.
+  function minutesAgo(minutes) {
+    return new Date(Date.now() - minutes * 60 * 1000 - Math.floor(Math.random() * 60) * 1000);
+  }
+
   // Due when the time has been reached within the last 12 hours, so a
   // reminder for 23:50 is not treated as due at 00:10 the day before.
   function isDue(due) {
@@ -94,6 +99,7 @@
     {
       id: id("p"), bed: "W2 R11", name: "Noura H.", age: 38,
       diagnosis: "Cellulitis, left leg", status: "seen",
+      seen: { by: "Dr. Reem Al-Saleh", at: minutesAgo(38) },
       orders: [],
     },
   ];
@@ -112,11 +118,13 @@
     {
       id: id("p"), bed: "W3 R9", name: "Hamad F.", age: 33,
       diagnosis: "Asthma exacerbation", status: "seen",
+      seen: { by: "Dr. Faisal Al-Mutawa", at: minutesAgo(64) },
       orders: [order("Discharge")],
     },
     {
       id: id("p"), bed: "W2 R14", name: "Dalal A.", age: 67,
       diagnosis: "UTI with acute kidney injury", status: "seen",
+      seen: { by: "Dr. Reem Al-Saleh", at: minutesAgo(12) },
       orders: [],
     },
   ];
@@ -261,11 +269,26 @@
     return wrap;
   }
 
-  function statusChip(status) {
-    return el("span", { class: "status-chip " + status, text: STATUS[status] });
+  function statusChip(patient) {
+    if (patient.status === "seen" && patient.seen) {
+      var btn = el("button", {
+        class: "status-chip seen is-button",
+        type: "button",
+        "aria-haspopup": "dialog",
+        "aria-label": "Seen — show who saw " + patient.name,
+        text: STATUS.seen,
+      });
+      btn.addEventListener("click", function (event) {
+        event.stopPropagation();
+        toggleSeenPop(btn, patient);
+      });
+      return btn;
+    }
+    return el("span", { class: "status-chip " + patient.status, text: STATUS[patient.status] });
   }
 
   function renderPatients() {
+    closeSeenPop();
     var endorseRows = document.getElementById("endorse-rows");
     endorseRows.textContent = "";
     endorsements.forEach(function (p) {
@@ -277,7 +300,7 @@
             el("div", { class: "cell summary" }, [
               el("span", { class: "patient-name", text: p.name }),
               el("span", { class: "muted", text: p.age + " y · " + p.diagnosis }),
-              statusChip(p.status),
+              statusChip(p),
             ]),
           ]),
           orderChips(p),
@@ -307,7 +330,7 @@
             ]),
             el("div", { class: "cell cell-status" }, [
               el("span", { class: "cell-label", text: "Status" }),
-              statusChip(p.status),
+              statusChip(p),
             ]),
           ]),
           orderChips(p),
@@ -317,6 +340,84 @@
 
     document.getElementById("admit-total").textContent = admissions.length;
   }
+
+  // ---------- "Seen by" window ----------
+
+  var seenPop = document.getElementById("seen-pop");
+  var seenAnchor = null;
+
+  var seenTimeFormat = new Intl.DateTimeFormat("en-GB", {
+    timeZone: TIME_ZONE,
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+  });
+  var seenDateFormat = new Intl.DateTimeFormat("en-GB", {
+    timeZone: TIME_ZONE,
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+
+  function initials(name) {
+    return name
+      .replace(/^Dr\.?\s+/i, "")
+      .split(/[\s-]+/)
+      .filter(function (w) { return w && w.toLowerCase() !== "al"; })
+      .slice(0, 2)
+      .map(function (w) { return w.charAt(0).toUpperCase(); })
+      .join("");
+  }
+
+  function placeSeenPop() {
+    if (!seenAnchor) return;
+    var r = seenAnchor.getBoundingClientRect();
+    var popW = seenPop.offsetWidth;
+    var popH = seenPop.offsetHeight;
+    var left = Math.min(Math.max(16, r.left + r.width / 2 - popW / 2), window.innerWidth - popW - 16);
+    var top = r.bottom + 8;
+    if (top + popH > window.innerHeight - 8 && r.top - popH - 8 > 8) top = r.top - popH - 8;
+    seenPop.style.left = left + "px";
+    seenPop.style.top = top + "px";
+  }
+
+  function closeSeenPop() {
+    if (!seenAnchor) return;
+    seenAnchor.setAttribute("aria-expanded", "false");
+    seenAnchor = null;
+    seenPop.hidden = true;
+  }
+
+  function toggleSeenPop(anchor, patient) {
+    if (seenAnchor === anchor) {
+      closeSeenPop();
+      return;
+    }
+    closeSeenPop();
+    document.getElementById("seen-pop-avatar").textContent = initials(patient.seen.by);
+    document.getElementById("seen-pop-name").textContent = patient.seen.by;
+    document.getElementById("seen-pop-time").textContent =
+      seenDateFormat.format(patient.seen.at) + " · " + seenTimeFormat.format(patient.seen.at);
+    seenAnchor = anchor;
+    anchor.setAttribute("aria-expanded", "true");
+    seenPop.hidden = false;
+    placeSeenPop();
+  }
+
+  document.addEventListener("click", function (event) {
+    if (seenAnchor && !seenPop.contains(event.target)) closeSeenPop();
+  });
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape" && seenAnchor) {
+      var anchor = seenAnchor;
+      closeSeenPop();
+      anchor.focus();
+    }
+  });
+  window.addEventListener("scroll", placeSeenPop, { passive: true });
+  window.addEventListener("resize", placeSeenPop);
 
   // ---------- Toasts ----------
 
