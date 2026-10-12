@@ -50,9 +50,33 @@
     return ((t % DAY) + DAY) % DAY;
   }
 
-  // A moment `minutes` ago, to the second.
+  // ---------- Shifts and the on-call team ----------
+
+  // A shift runs from 08:00 to 08:00 Kuwait time (UTC+3, no daylight saving).
+  // The on-call team moves to the next one each shift: 1 > 2 > 3 > 1 ...
+  var HOUR_MS = 60 * 60 * 1000;
+  var DAY_MS = 24 * HOUR_MS;
+  var SHIFT_OFFSET_MS = (3 - 8) * HOUR_MS;
+  var TEAMS = 3;
+  // The shift starting 12 October 2026 at 08:00 belongs to Team 1.
+  var TEAM_ONE_SHIFT = Date.UTC(2026, 9, 12) / DAY_MS;
+
+  function shiftNumber(ms) {
+    return Math.floor((ms + SHIFT_OFFSET_MS) / DAY_MS);
+  }
+
+  function shiftStart(shift) {
+    return shift * DAY_MS - SHIFT_OFFSET_MS;
+  }
+
+  function teamOnCall(shift) {
+    return ((((shift - TEAM_ONE_SHIFT) % TEAMS) + TEAMS) % TEAMS) + 1;
+  }
+
+  // A moment `minutes` ago, to the second, but never before this shift began.
   function minutesAgo(minutes) {
-    return new Date(Date.now() - minutes * 60 * 1000 - Math.floor(Math.random() * 60) * 1000);
+    var at = Date.now() - minutes * 60 * 1000 - Math.floor(Math.random() * 60) * 1000;
+    return new Date(Math.max(at, shiftStart(shiftNumber(Date.now())) + 60 * 1000));
   }
 
   // Due when the time has been reached within the last 12 hours, so a
@@ -338,6 +362,13 @@
       );
     });
 
+    if (endorsements.length === 0) {
+      endorseRows.appendChild(el("li", { class: "rows-empty", text: "No patients endorsed yet this shift." }));
+    }
+    if (admissions.length === 0) {
+      admitRows.appendChild(el("li", { class: "rows-empty", text: "No new admissions yet this shift." }));
+    }
+    document.querySelector("#admissions .table-cols").hidden = admissions.length === 0;
     document.getElementById("admit-total").textContent = admissions.length;
   }
 
@@ -457,10 +488,14 @@
   var bedSelect = document.getElementById("reminder-bed");
   var timeInput = document.getElementById("reminder-time");
 
-  bedSelect.appendChild(el("option", { value: "", text: "General (no patient)" }));
-  patients.forEach(function (p) {
-    bedSelect.appendChild(el("option", { value: p.id, text: p.bed + " — " + p.name }));
-  });
+  function fillBedSelect() {
+    bedSelect.textContent = "";
+    bedSelect.appendChild(el("option", { value: "", text: "General (no patient)" }));
+    patients.forEach(function (p) {
+      bedSelect.appendChild(el("option", { value: p.id, text: p.bed + " — " + p.name }));
+    });
+  }
+  fillBedSelect();
 
   document.getElementById("add-reminder").addEventListener("click", function () {
     form.reset();
@@ -527,12 +562,33 @@
 
   var clockTime = document.getElementById("clock-time");
   var clockDate = document.getElementById("clock-date");
+  var oncallTeam = document.getElementById("oncall-team");
   var lastMinute = -1;
+  var currentShift = shiftNumber(Date.now());
+
+  // At 08:00 the shift hands over: the next team comes on call and the
+  // reminders, endorsements and admissions all start again empty.
+  function startNewShift(shift) {
+    currentShift = shift;
+    reminders = [];
+    endorsements = [];
+    admissions = [];
+    patients = [];
+    if (dialog.open) dialog.close();
+    fillBedSelect();
+    renderPatients();
+    renderReminders();
+    toast("New shift started", "Team " + teamOnCall(shift) + " is now on call. Reminders, endorsements and admissions have been cleared.");
+  }
 
   function tick() {
     var now = new Date();
     clockTime.textContent = timeFormat.format(now);
     clockDate.textContent = dateFormat.format(now);
+
+    var shift = shiftNumber(now.getTime());
+    if (shift !== currentShift) startNewShift(shift);
+    oncallTeam.textContent = teamOnCall(shift);
 
     var minute = kuwaitMinutes();
     if (minute !== lastMinute) {
