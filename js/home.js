@@ -350,15 +350,7 @@
     timeZone: TIME_ZONE,
     hour: "2-digit",
     minute: "2-digit",
-    second: "2-digit",
     hourCycle: "h23",
-  });
-  var seenDateFormat = new Intl.DateTimeFormat("en-GB", {
-    timeZone: TIME_ZONE,
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-    year: "numeric",
   });
 
   function initials(name) {
@@ -398,8 +390,7 @@
     closeSeenPop();
     document.getElementById("seen-pop-avatar").textContent = initials(patient.seen.by);
     document.getElementById("seen-pop-name").textContent = patient.seen.by;
-    document.getElementById("seen-pop-time").textContent =
-      seenDateFormat.format(patient.seen.at) + " · " + seenTimeFormat.format(patient.seen.at);
+    document.getElementById("seen-pop-time").textContent = seenTimeFormat.format(patient.seen.at);
     seenAnchor = anchor;
     anchor.setAttribute("aria-expanded", "true");
     seenPop.hidden = false;
