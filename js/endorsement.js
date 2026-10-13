@@ -60,11 +60,11 @@
     var ageText = val("age");
 
     if (!val("patient-name")) return showError("Enter the patient's name.", "patient-name");
-    if (!val("ward")) return showError("Enter the ward.", "ward");
+    if (!val("ward")) return showError("Choose the ward.", "ward");
     if (!val("room")) return showError("Enter the room.", "room");
     if (!val("team")) return showError("Choose which team the patient is under.", "team");
     if (ageText && !(Number(ageText) >= 0 && Number(ageText) <= 130)) return showError("Enter an age between 0 and 130.", "age");
-    if (!severity) return showError("Choose the illness severity: Stable, Watcher or STAR.");
+    if (!severity) return showError("Choose the illness severity: Stable, Watcher or Unstable.");
     if (!val("working-diagnosis")) return showError("Enter the working differential diagnosis.", "working-diagnosis");
 
     var row = {
@@ -77,7 +77,6 @@
       severity: severity.value,
       working_diagnosis: val("working-diagnosis"),
       summary: val("summary"),
-      ongoing_assessment: val("ongoing-assessment"),
       plan: val("plan"),
       suggestions: val("suggestions"),
     };
@@ -159,38 +158,6 @@
     ]);
   }
 
-  function orderList(p) {
-    var orders = board.ordersFor("endorsement", p.id);
-    if (!orders.length) return [el("p", { class: "muted", text: "No pending actions." })];
-    return [el("ul", { class: "action-list" }, orders.map(function (o) {
-      var tick = el("button", {
-        type: "button",
-        class: "action-tick" + (o.done ? " is-done" : ""),
-        "aria-label": o.done ? o.label + " — done" : "Mark “" + o.label + "” as done",
-        "aria-pressed": String(o.done),
-        disabled: o.done,
-        html: P.ICON.check,
-      });
-      tick.addEventListener("click", function () {
-        tick.disabled = true;
-        P.db.from("orders").update({ done: true }).eq("id", o.id).then(function (res) {
-          if (res.error) {
-            tick.disabled = false;
-            P.toast("Not marked as done", P.errorMessage(res.error), "error");
-            return;
-          }
-          refresh();
-        });
-      });
-      return el("li", { class: o.done ? "is-done" : (P.isDue(o.due_at) ? "is-due" : "") }, [
-        tick,
-        el("span", { class: "action-label", text: o.label }),
-        o.due_at ? el("span", { class: "action-due", text: P.formatHM(o.due_at) }) : null,
-        o.done ? el("span", { class: "action-by", text: P.doctorName(o.done_by) + " · " + P.formatHM(o.done_at) }) : null,
-      ]);
-    }))];
-  }
-
   function synthesisEditor(p) {
     var wrap = el("div", { class: "synthesis" });
     function show() {
@@ -261,7 +228,7 @@
           textBlock("Ongoing assessment", p.ongoing_assessment),
           textBlock("Suggested plan", p.plan),
         ]),
-        ipassRow("A", "Action list", orderList(p)),
+        ipassRow("A", "Action list", [P.orderChecklist("endorsement", p, board.ordersFor("endorsement", p.id), refresh)]),
         ipassRow("S", "Suggestions", [p.suggestions ? el("p", { text: p.suggestions }) : el("p", { class: "muted", text: "None given." })]),
         ipassRow("S", "Synthesis by receiver", [synthesisEditor(p)]),
       ]),
@@ -317,9 +284,9 @@
       if (target) target.scrollIntoView({ block: "center" });
       if (!board.endorsements.length) setFormOpen(true);
     });
-    // Do not redraw under someone typing a synthesis.
+    // Do not redraw under someone typing or choosing.
     P.onDataChange(function () {
-      if (document.activeElement && document.activeElement.closest && document.activeElement.closest(".synthesis")) return;
+      if (P.isEditing() || P.isPopOpen()) return;
       refresh();
     });
     P.onShiftChange(refresh);

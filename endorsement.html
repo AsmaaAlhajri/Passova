@@ -54,7 +54,12 @@
             </div>
             <div class="field">
               <label for="ward">Ward *</label>
-              <input class="input" id="ward" type="text" maxlength="20" placeholder="e.g. W1" required>
+              <select class="input" id="ward" required>
+                <option value="">Choose…</option>
+                <option value="W1">Ward 1</option>
+                <option value="W2">Ward 2</option>
+                <option value="W3">Ward 3</option>
+              </select>
             </div>
             <div class="field">
               <label for="room">Room *</label>
@@ -84,8 +89,8 @@
               <span><strong>Watcher</strong><small>Potential to become critical</small></span>
             </label>
             <label class="severity-option">
-              <input type="radio" name="severity" value="star">
-              <span><strong>STAR</strong><small>Ongoing resuscitation</small></span>
+              <input type="radio" name="severity" value="unstable">
+              <span><strong>Unstable</strong><small>Needs frequent intervention</small></span>
             </label>
           </div>
         </fieldset>
@@ -100,15 +105,9 @@
             <label for="summary">Brief overview</label>
             <textarea class="input" id="summary" rows="5" maxlength="4000" placeholder="Age, gender, relevant PMH/PSH · CC, significant signs and symptoms, time frame · relevant ROS and exam findings · known diagnostic results · interventions given (incl. IV access) · consults made"></textarea>
           </div>
-          <div class="form-grid two">
-            <div class="field">
-              <label for="ongoing-assessment">Ongoing assessment</label>
-              <textarea class="input" id="ongoing-assessment" rows="3" maxlength="2000"></textarea>
-            </div>
-            <div class="field">
-              <label for="plan">Suggested plan</label>
-              <textarea class="input" id="plan" rows="3" maxlength="2000"></textarea>
-            </div>
+          <div class="field">
+            <label for="plan">Suggested plan</label>
+            <textarea class="input" id="plan" rows="3" maxlength="2000"></textarea>
           </div>
         </fieldset>
 
@@ -155,7 +154,7 @@
             <button type="button" class="filter-btn is-active" data-filter="severity" data-value="" aria-pressed="true">All severities</button>
             <button type="button" class="filter-btn" data-filter="severity" data-value="stable" aria-pressed="false">Stable</button>
             <button type="button" class="filter-btn" data-filter="severity" data-value="watcher" aria-pressed="false">Watcher</button>
-            <button type="button" class="filter-btn" data-filter="severity" data-value="star" aria-pressed="false">STAR</button>
+            <button type="button" class="filter-btn" data-filter="severity" data-value="unstable" aria-pressed="false">Unstable</button>
           </div>
         </div>
       </div>

@@ -171,7 +171,7 @@
             ]),
             el("div", { class: "cell cell-cond" }, [
               el("span", { class: "cell-label", text: "Condition" }),
-              P.conditionChip(p.condition),
+              P.conditionButton(p),
             ]),
             el("div", { class: "cell cell-status" }, [
               el("span", { class: "cell-label", text: "Status" }),

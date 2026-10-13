@@ -201,7 +201,7 @@
           r.done_by = ME;
           r.done_at = stamp;
         }
-        ["synthesis", "full_name", "position", "team", "phone"].forEach(function (k) {
+        ["synthesis", "condition", "full_name", "position", "team", "phone"].forEach(function (k) {
           if (k in p) r[k] = p[k];
         });
       }

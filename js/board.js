@@ -52,15 +52,11 @@
     return wrap;
   }
 
-  var SEVERITY = { stable: "Stable", watcher: "Watcher", star: "STAR" };
+  var SEVERITY = { stable: "Stable", watcher: "Watcher", unstable: "Unstable" };
   var CONDITION = { stable: "Stable", unstable: "Unstable", watcher: "Watcher" };
 
   function severityChip(value) {
     return el("span", { class: "acuity acuity-" + value, text: SEVERITY[value] || value });
-  }
-
-  function conditionChip(value) {
-    return el("span", { class: "acuity acuity-" + value, text: CONDITION[value] || value });
   }
 
   // An editable action list (I-PASS "A"): rows of task + optional time.
@@ -104,10 +100,80 @@
     };
   }
 
+  // A patient's orders as a checklist: tick one off with the green check on
+  // its left, or add another below. `kind` is "endorsement" or "admission";
+  // `onChange` runs after anything is saved.
+  function orderChecklist(kind, patient, orders, onChange) {
+    var wrap = el("div", { class: "checklist" });
+
+    if (orders.length) {
+      wrap.appendChild(el("ul", { class: "action-list" }, orders.map(function (o) {
+        var tick = el("button", {
+          type: "button",
+          class: "action-tick" + (o.done ? " is-done" : ""),
+          "aria-label": o.done ? o.label + " — done" : "Mark “" + o.label + "” as done",
+          "aria-pressed": String(o.done),
+          disabled: o.done,
+          html: P.ICON.check,
+        });
+        tick.addEventListener("click", function () {
+          tick.disabled = true;
+          tick.classList.add("is-done");
+          P.db.from("orders").update({ done: true }).eq("id", o.id).then(function (res) {
+            if (res.error) {
+              tick.disabled = false;
+              tick.classList.remove("is-done");
+              P.toast("Not marked as done", P.errorMessage(res.error), "error");
+              return;
+            }
+            onChange();
+          });
+        });
+        return el("li", { class: o.done ? "is-done" : (P.isDue(o.due_at) ? "is-due" : "") }, [
+          tick,
+          el("span", { class: "action-label", text: o.label }),
+          o.due_at ? el("span", { class: "action-due", text: P.formatHM(o.due_at) }) : null,
+          o.done ? el("span", { class: "action-by", text: P.doctorName(o.done_by) + " · " + P.formatHM(o.done_at) }) : null,
+        ]);
+      })));
+    } else {
+      wrap.appendChild(el("p", { class: "muted checklist-empty", text: "No orders yet." }));
+    }
+
+    var label = el("input", {
+      class: "input", type: "text", maxlength: "200", placeholder: "Add an order",
+      "aria-label": "New order for " + patient.patient_name,
+    });
+    var time = el("input", { class: "input", type: "time", "aria-label": "Due time (optional)" });
+    var add = el("button", { type: "submit", class: "btn btn-primary btn-sm", text: "Add" });
+    var form = el("form", { class: "checklist-add", novalidate: true }, [label, time, add]);
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+      var text = label.value.trim();
+      if (!text) {
+        label.focus();
+        return;
+      }
+      var row = { label: text, due_at: P.dueFromTimeInput(time.value) };
+      row[kind === "endorsement" ? "endorsement_id" : "admission_id"] = patient.id;
+      add.disabled = true;
+      P.db.from("orders").insert(row).then(function (res) {
+        add.disabled = false;
+        if (res.error) {
+          P.toast("Order not added", P.errorMessage(res.error), "error");
+          return;
+        }
+        onChange();
+      });
+    });
+    wrap.appendChild(form);
+    return wrap;
+  }
+
+  P.orderChecklist = orderChecklist;
   P.loadBoard = loadBoard;
   P.orderChips = orderChips;
   P.severityChip = severityChip;
-  P.conditionChip = conditionChip;
   P.SEVERITY = SEVERITY;
   P.CONDITION = CONDITION;
   P.actionListEditor = actionListEditor;

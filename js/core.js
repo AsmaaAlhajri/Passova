@@ -504,6 +504,60 @@
     return btn;
   }
 
+  // An admitted patient's condition, as a chip that opens a window to change
+  // it: Stable, Watcher or Unstable.
+  var CONDITION = { stable: "Stable", watcher: "Watcher", unstable: "Unstable" };
+
+  function conditionWindow(row) {
+    var list = el("div", { class: "status-options", role: "listbox", "aria-label": "Set condition" });
+    ["stable", "watcher", "unstable"].forEach(function (value) {
+      var current = row.condition === value;
+      var option = el("button", {
+        type: "button",
+        class: "status-option" + (current ? " is-current" : ""),
+        role: "option",
+        "aria-selected": String(current),
+      }, [
+        el("span", { class: "acuity acuity-" + value, text: CONDITION[value] }),
+        current ? el("span", { class: "status-option-check", html: ICON.check }) : null,
+      ]);
+      option.addEventListener("click", function () {
+        if (current) {
+          closePop();
+          return;
+        }
+        option.disabled = true;
+        db.from("admissions").update({ condition: value }).eq("id", row.id).select().single().then(function (res) {
+          closePop();
+          if (res.error) {
+            toast("Condition not changed", errorMessage(res.error), "error");
+            return;
+          }
+          Object.assign(row, res.data);
+          document.dispatchEvent(new CustomEvent("passova:changed"));
+        });
+      });
+      list.appendChild(option);
+    });
+    return [el("p", { class: "seen-pop-label is-neutral", text: "Set condition" }), list];
+  }
+
+  function conditionButton(row) {
+    var btn = el("button", {
+      type: "button",
+      class: "acuity is-button acuity-" + row.condition,
+      "aria-haspopup": "dialog",
+      "aria-expanded": "false",
+      "aria-label": CONDITION[row.condition] + " — change condition for " + row.patient_name,
+      text: CONDITION[row.condition],
+    });
+    btn.addEventListener("click", function (event) {
+      event.stopPropagation();
+      openPop(btn, conditionWindow(row));
+    });
+    return btn;
+  }
+
   function bedLabel(row) {
     return (row.ward + " " + row.room).trim();
   }
@@ -560,8 +614,15 @@
     onDataChange: onDataChange,
     STATUS: STATUS,
     statusButton: statusButton,
+    conditionButton: conditionButton,
     closePop: closePop,
     isPopOpen: function () { return !!popAnchor; },
+    // True while a doctor is typing into a card (new order, synthesis), so
+    // live updates can wait instead of wiping what they typed.
+    isEditing: function () {
+      var a = document.activeElement;
+      return !!(a && a.closest && a.closest(".synthesis, .checklist-add") && (a.value || a.tagName === "TEXTAREA"));
+    },
     bedLabel: bedLabel,
     confirmButton: confirmButton,
   };

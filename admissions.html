@@ -17,7 +17,6 @@
     <div class="page-head">
       <div>
         <h1 class="page-title">New admissions</h1>
-        <p class="section-sub">Patients admitted to the hospital during this on-call.</p>
       </div>
       <button class="btn btn-primary" type="button" id="open-form" aria-controls="admit-form-card" aria-expanded="false">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
@@ -37,7 +36,12 @@
           <div class="form-grid">
             <div class="field">
               <label for="ward">Ward *</label>
-              <input class="input" id="ward" type="text" maxlength="20" placeholder="e.g. W1" required>
+              <select class="input" id="ward" required>
+                <option value="">Choose…</option>
+                <option value="W1">Ward 1</option>
+                <option value="W2">Ward 2</option>
+                <option value="W3">Ward 3</option>
+              </select>
             </div>
             <div class="field">
               <label for="room">Room *</label>
@@ -92,19 +96,12 @@
     </section>
 
     <section aria-labelledby="list-title">
-      <div class="table-head">
-        <div class="section-head">
-          <div>
-            <h2 class="section-title" id="list-title">Admitted this on-call</h2>
-            <p class="section-sub">Tap a patient's status to update it. A patient marked as seen stays seen.</p>
-          </div>
-        </div>
-        <div class="orders-head" aria-hidden="true">Pending orders</div>
-      </div>
+      <h2 class="visually-hidden" id="list-title">Admitted this on-call</h2>
       <div class="table-head table-cols" aria-hidden="true">
         <div class="table-head-cols">
           <span>#</span><span>Location</span><span>Name</span><span>Age</span><span>Diagnosis</span><span>Condition</span><span>Status</span>
         </div>
+        <span class="table-head-orders">Pending orders</span>
       </div>
       <ul class="rows admit" id="admit-rows"></ul>
 

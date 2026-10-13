@@ -371,3 +371,13 @@ alter table public.reminders
 alter table public.reminders
   add constraint reminders_one_patient
   check (num_nonnulls(endorsement_id, admission_id, nullif(btrim(patient_label), '')) = 1);
+
+-- ---------- Severity "STAR" is now called "Unstable"; condition can change ----------
+
+alter table public.endorsements drop constraint endorsements_severity_check;
+update public.endorsements set severity = 'unstable' where severity = 'star';
+alter table public.endorsements
+  add constraint endorsements_severity_check check (severity in ('stable', 'watcher', 'unstable'));
+
+-- Any doctor can update an admitted patient's condition.
+grant update (condition) on public.admissions to authenticated;

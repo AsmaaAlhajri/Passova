@@ -58,7 +58,7 @@
     var condition = form.querySelector("input[name=condition]:checked");
     var ageText = val("age");
 
-    if (!val("ward")) return showError("Enter the ward.", "ward");
+    if (!val("ward")) return showError("Choose the ward.", "ward");
     if (!val("room")) return showError("Enter the room.", "room");
     if (!val("patient-name")) return showError("Enter the patient's name.", "patient-name");
     if (!ageText || !(Number(ageText) >= 0 && Number(ageText) <= 130)) return showError("Enter an age between 0 and 130.", "age");
@@ -133,14 +133,16 @@
             ]),
             el("div", { class: "cell cell-cond" }, [
               el("span", { class: "cell-label", text: "Condition" }),
-              P.conditionChip(p.condition),
+              P.conditionButton(p),
             ]),
             el("div", { class: "cell cell-status" }, [
               el("span", { class: "cell-label", text: "Status" }),
               P.statusButton("admissions", p),
             ]),
           ]),
-          P.orderChips(board.ordersFor("admission", p.id)),
+          el("div", { class: "row-orders is-checklist" }, [
+            P.orderChecklist("admission", p, board.ordersFor("admission", p.id), refresh),
+          ]),
           el("div", { class: "row-foot" }, [
             el("p", { class: "entered-by" }, [
               "Added by ",
@@ -189,7 +191,7 @@
       }
     });
     P.onDataChange(function () {
-      if (!P.isPopOpen()) refresh();
+      if (!P.isPopOpen() && !P.isEditing()) refresh();
     });
     P.onShiftChange(refresh);
     document.addEventListener("passova:changed", render);
