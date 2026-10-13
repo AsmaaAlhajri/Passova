@@ -51,11 +51,19 @@
               <label for="patient-name">Patient name *</label>
               <input class="input" id="patient-name" type="text" maxlength="120" required>
             </div>
-            <div class="field">
+            <div class="field span-2">
               <label for="age">Age *</label>
-              <input class="input" id="age" type="number" min="0" max="130" inputmode="numeric" required>
+              <div class="age-group">
+                <input class="input" id="age" type="number" min="0" max="130" inputmode="numeric" required>
+                <select class="input" id="age-unit" aria-label="Age in">
+                  <option value="years">Years</option>
+                  <option value="months">Months</option>
+                  <option value="days">Days</option>
+                  <option value="hours">Hours</option>
+                </select>
+              </div>
             </div>
-            <div class="field span-3">
+            <div class="field span-2">
               <label for="diagnosis">Diagnosis *</label>
               <input class="input" id="diagnosis" type="text" maxlength="300" required>
             </div>

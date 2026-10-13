@@ -136,7 +136,7 @@
             el("a", { class: "bed", href: "endorsement.html#e-" + p.id, text: P.bedLabel(p) }),
             el("div", { class: "cell summary" }, [
               el("a", { class: "patient-name", href: "endorsement.html#e-" + p.id, text: p.patient_name }),
-              el("span", { class: "muted", text: (p.age !== null ? p.age + " y · " : "") + p.working_diagnosis }),
+              el("span", { class: "muted", text: (p.age !== null ? P.formatAge(p) + " · " : "") + p.working_diagnosis }),
               P.severityChip(p.severity),
               P.statusButton("endorsements", p),
             ]),
@@ -163,7 +163,7 @@
             ]),
             el("div", { class: "cell cell-age" }, [
               el("span", { class: "cell-label", text: "Age" }),
-              el("span", { text: String(p.age) }),
+              el("span", { text: P.formatAge(p) }),
             ]),
             el("div", { class: "cell cell-dx" }, [
               el("span", { class: "cell-label", text: "Diagnosis" }),

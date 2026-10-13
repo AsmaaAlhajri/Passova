@@ -70,6 +70,7 @@
       room: val("room").toUpperCase(),
       patient_name: val("patient-name"),
       age: Number(ageText),
+      age_unit: val("age-unit"),
       diagnosis: val("diagnosis"),
       condition: condition.value,
     };
@@ -125,7 +126,7 @@
             ]),
             el("div", { class: "cell cell-age" }, [
               el("span", { class: "cell-label", text: "Age" }),
-              el("span", { text: String(p.age) }),
+              el("span", { text: P.formatAge(p) }),
             ]),
             el("div", { class: "cell cell-dx" }, [
               el("span", { class: "cell-label", text: "Diagnosis" }),

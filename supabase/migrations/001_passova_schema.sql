@@ -381,3 +381,10 @@ alter table public.endorsements
 
 -- Any doctor can update an admitted patient's condition.
 grant update (condition) on public.admissions to authenticated;
+
+-- ---------- Age can be in hours, days, months or years ----------
+
+alter table public.endorsements
+  add column age_unit text not null default 'years' check (age_unit in ('hours', 'days', 'months', 'years'));
+alter table public.admissions
+  add column age_unit text not null default 'years' check (age_unit in ('hours', 'days', 'months', 'years'));

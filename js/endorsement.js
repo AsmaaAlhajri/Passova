@@ -70,6 +70,7 @@
     var row = {
       patient_name: val("patient-name"),
       age: ageText ? Number(ageText) : null,
+      age_unit: val("age-unit"),
       gender: val("gender") || null,
       ward: val("ward").toUpperCase(),
       room: val("room").toUpperCase(),
@@ -202,7 +203,7 @@
 
   function endorsementCard(p) {
     var mine = me && p.created_by === me.user.id;
-    var facts = [p.age !== null ? p.age + " y" : null, p.gender ? (p.gender === "male" ? "Male" : "Female") : null]
+    var facts = [p.age !== null ? P.formatAge(p) : null, p.gender ? (p.gender === "male" ? "Male" : "Female") : null]
       .filter(Boolean).join(" · ");
 
     return el("article", { class: "card endorse-card status-edge-" + p.status.replace("_", "-"), id: "e-" + p.id }, [

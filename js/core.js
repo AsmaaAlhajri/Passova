@@ -558,6 +558,13 @@
     return btn;
   }
 
+  // "58 years", "5 days", "1 month" — age with its unit (years if unset).
+  function formatAge(row) {
+    if (row.age === null || row.age === undefined) return "";
+    var unit = row.age_unit || "years";
+    return row.age + " " + (row.age === 1 ? unit.replace(/s$/, "") : unit);
+  }
+
   function bedLabel(row) {
     return (row.ward + " " + row.room).trim();
   }
@@ -624,6 +631,7 @@
       return !!(a && a.closest && a.closest(".synthesis, .checklist-add") && (a.value || a.tagName === "TEXTAREA"));
     },
     bedLabel: bedLabel,
+    formatAge: formatAge,
     confirmButton: confirmButton,
   };
 })();

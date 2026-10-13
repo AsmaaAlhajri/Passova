@@ -40,17 +40,17 @@
               <label for="patient-name">Patient name *</label>
               <input class="input" id="patient-name" type="text" maxlength="120" required>
             </div>
-            <div class="field">
+            <div class="field span-2">
               <label for="age">Age</label>
-              <input class="input" id="age" type="number" min="0" max="130" inputmode="numeric">
-            </div>
-            <div class="field">
-              <label for="gender">Gender</label>
-              <select class="input" id="gender">
-                <option value="">—</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-              </select>
+              <div class="age-group">
+                <input class="input" id="age" type="number" min="0" max="130" inputmode="numeric">
+                <select class="input" id="age-unit" aria-label="Age in">
+                  <option value="years">Years</option>
+                  <option value="months">Months</option>
+                  <option value="days">Days</option>
+                  <option value="hours">Hours</option>
+                </select>
+              </div>
             </div>
             <div class="field">
               <label for="ward">Ward *</label>
@@ -65,7 +65,15 @@
               <label for="room">Room *</label>
               <input class="input" id="room" type="text" maxlength="20" placeholder="e.g. R2B" required>
             </div>
-            <div class="field span-2">
+            <div class="field">
+              <label for="gender">Gender</label>
+              <select class="input" id="gender">
+                <option value="">—</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+            </div>
+            <div class="field">
               <label for="team">Patient is under *</label>
               <select class="input" id="team" required>
                 <option value="">Choose a team…</option>
