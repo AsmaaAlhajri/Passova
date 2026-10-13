@@ -97,7 +97,7 @@
         { id: "do5", created_at: ago(15), created_by: ME, endorsement_id: null, admission_id: "da3", label: "Discharge summary", due_at: null, done: false, done_by: null, done_at: null },
       ],
       reminders: [
-        { id: "dr1", created_at: ago(20), created_by: THIRD, endorsement_id: null, admission_id: null, text: "Call radiology about the CT list", due_at: null, done: false, done_by: null, done_at: null },
+        { id: "dr1", created_at: ago(20), created_by: THIRD, endorsement_id: null, admission_id: null, patient_label: "Salem Q., W4 R6", text: "Call radiology about his CT abdomen", due_at: null, done: false, done_by: null, done_at: null },
       ],
     };
   }

@@ -358,3 +358,16 @@ end;
 $$;
 
 revoke execute on function public.handle_new_user() from public, anon, authenticated;
+
+-- ---------- Every reminder names a patient ----------
+-- Either one of this shift's patients, or one typed in by hand ("Other").
+
+alter table public.reminders
+  add column patient_label text check (patient_label is null or char_length(patient_label) between 1 and 120);
+
+alter table public.reminders
+  drop constraint reminders_check;
+
+alter table public.reminders
+  add constraint reminders_one_patient
+  check (num_nonnulls(endorsement_id, admission_id, nullif(btrim(patient_label), '')) = 1);

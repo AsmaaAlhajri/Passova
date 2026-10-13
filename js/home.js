@@ -48,6 +48,7 @@
       var meta = el("div", { class: "reminder-meta" }, [
         patient ? el("span", { class: "tag tag-bed", text: P.bedLabel(patient) }) : null,
         patient ? el("span", { text: patient.patient_name }) : null,
+        !patient && row.patient_label ? el("span", { class: "tag tag-bed", text: row.patient_label }) : null,
         el("span", {
           class: "tag " + (item.kind === "order" ? "tag-order" : "tag-manual"),
           text: item.kind === "order" ? "Pending order" : "Added by " + P.doctorName(row.created_by),
@@ -107,7 +108,8 @@
       var patient = patientFor(item.row);
       P.toast(
         "Reminder due · " + P.formatHM(item.row.due_at),
-        item.text + (patient ? " — " + P.bedLabel(patient) + ", " + patient.patient_name : "")
+        item.text + (patient ? " — " + P.bedLabel(patient) + ", " + patient.patient_name
+          : item.row.patient_label ? " — " + item.row.patient_label : "")
       );
     });
   }
@@ -212,23 +214,49 @@
   var patientSelect = document.getElementById("reminder-patient");
   var timeInput = document.getElementById("reminder-time");
   var saveBtn = document.getElementById("reminder-save");
+  var otherField = document.getElementById("reminder-other-field");
+  var otherInput = document.getElementById("reminder-other");
+  var reminderError = document.getElementById("reminder-error");
 
+  // Every reminder is about a patient: one of this shift's, or "Other",
+  // typed in by hand.
   function fillPatientSelect() {
     var keep = patientSelect.value;
     patientSelect.textContent = "";
-    patientSelect.appendChild(el("option", { value: "", text: "General (no patient)" }));
+    patientSelect.appendChild(el("option", { value: "", text: "Choose a patient…", disabled: true }));
     board.endorsements.forEach(function (p) {
       patientSelect.appendChild(el("option", { value: "e:" + p.id, text: P.bedLabel(p) + " — " + p.patient_name }));
     });
     board.admissions.forEach(function (p) {
       patientSelect.appendChild(el("option", { value: "a:" + p.id, text: P.bedLabel(p) + " — " + p.patient_name + " (new)" }));
     });
+    patientSelect.appendChild(el("option", { value: "other", text: "Other…" }));
     patientSelect.value = keep;
     if (patientSelect.value !== keep) patientSelect.value = "";
+    showOther();
   }
+
+  function showOther() {
+    otherField.hidden = patientSelect.value !== "other";
+  }
+
+  function showReminderError(message, focus) {
+    reminderError.textContent = message;
+    reminderError.hidden = false;
+    if (focus) focus.focus();
+  }
+
+  patientSelect.addEventListener("change", function () {
+    reminderError.hidden = true;
+    showOther();
+    if (patientSelect.value === "other") otherInput.focus();
+  });
 
   document.getElementById("add-reminder").addEventListener("click", function () {
     form.reset();
+    patientSelect.value = "";
+    reminderError.hidden = true;
+    showOther();
     dialog.showModal();
     textInput.focus();
   });
@@ -239,23 +267,26 @@
 
   form.addEventListener("submit", function (event) {
     event.preventDefault();
+    reminderError.hidden = true;
     var text = textInput.value.trim();
-    if (!text) {
-      textInput.focus();
-      return;
-    }
     var target = patientSelect.value;
+    var other = otherInput.value.trim();
+    if (!text) return showReminderError("Write what the reminder is for.", textInput);
+    if (!target) return showReminderError("Choose a patient, or pick Other and type one in.", patientSelect);
+    if (target === "other" && !other) return showReminderError("Type the patient's name and location.", otherInput);
+
     var row = {
       text: text,
       due_at: P.dueFromTimeInput(timeInput.value),
       endorsement_id: target.indexOf("e:") === 0 ? target.slice(2) : null,
       admission_id: target.indexOf("a:") === 0 ? target.slice(2) : null,
+      patient_label: target === "other" ? other : null,
     };
     saveBtn.disabled = true;
     P.db.from("reminders").insert(row).select().single().then(function (res) {
       saveBtn.disabled = false;
       if (res.error) {
-        P.toast("Reminder not added", P.errorMessage(res.error), "error");
+        showReminderError(P.errorMessage(res.error));
         return;
       }
       // Already overdue when added: show it red, without a pop-up.

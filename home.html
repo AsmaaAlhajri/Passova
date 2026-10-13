@@ -80,7 +80,7 @@
 
   <!-- Add reminder dialog -->
   <dialog class="dialog" id="reminder-dialog" aria-labelledby="dialog-title">
-    <form method="dialog" id="reminder-form">
+    <form method="dialog" id="reminder-form" novalidate>
       <h2 id="dialog-title">Add a reminder</h2>
       <p class="hint">Leave the time empty for a reminder that stays until someone marks it done.</p>
 
@@ -89,16 +89,22 @@
         <input class="input" id="reminder-text" type="text" maxlength="200" placeholder="e.g. Call radiology about CT chest" required>
       </div>
 
-      <div class="dialog-row">
-        <div class="field">
-          <label for="reminder-patient">Patient <span class="optional">(optional)</span></label>
-          <select class="input" id="reminder-patient"></select>
-        </div>
-        <div class="field">
-          <label for="reminder-time">Time <span class="optional">(optional)</span></label>
-          <input class="input" id="reminder-time" type="time">
-        </div>
+      <div class="field">
+        <label for="reminder-patient">Patient</label>
+        <select class="input" id="reminder-patient" required></select>
       </div>
+
+      <div class="field" id="reminder-other-field" hidden>
+        <label for="reminder-other">Patient name and location</label>
+        <input class="input" id="reminder-other" type="text" maxlength="120" placeholder="e.g. Salem Q., W4 R6">
+      </div>
+
+      <div class="field">
+        <label for="reminder-time">Time <span class="optional">(optional)</span></label>
+        <input class="input" id="reminder-time" type="time">
+      </div>
+
+      <p class="form-error" id="reminder-error" role="alert" hidden></p>
 
       <div class="dialog-actions">
         <button class="btn btn-ghost" type="button" id="reminder-cancel">Cancel</button>
