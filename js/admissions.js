@@ -18,6 +18,12 @@
   var submitBtn = document.getElementById("submit-form");
   var errorBox = document.getElementById("form-error");
   var actions = P.actionListEditor(document.getElementById("action-editor"));
+  var actionsBlock = document.getElementById("action-editor").closest("fieldset");
+  var formTitle = document.getElementById("form-title");
+  var formSub = document.getElementById("form-sub");
+  var newSub = formSub.innerHTML;
+  // The admission being edited, or null when adding a new one.
+  var editing = null;
 
   function setFormOpen(open) {
     card.hidden = !open;
@@ -33,6 +39,32 @@
     form.reset();
     actions.reset();
     errorBox.hidden = true;
+    editing = null;
+    formTitle.textContent = "New admission";
+    formSub.innerHTML = newSub;
+    submitBtn.textContent = "Add patient";
+    actionsBlock.hidden = false;
+  }
+
+  // Load one of my admissions into the form. Its orders stay in the
+  // checklist on the list, and its status is not touched.
+  function startEdit(p) {
+    resetForm();
+    editing = p;
+    var set = function (id, v) { document.getElementById(id).value = v === null || v === undefined ? "" : v; };
+    set("ward", p.ward);
+    set("room", p.room);
+    set("patient-name", p.patient_name);
+    set("age", p.age);
+    set("age-unit", p.age_unit || "years");
+    set("diagnosis", p.diagnosis);
+    var radio = form.querySelector('input[name=condition][value="' + p.condition + '"]');
+    if (radio) radio.checked = true;
+    formTitle.textContent = "Edit admission · " + p.patient_name;
+    formSub.textContent = "Only you can edit this patient, because you added them.";
+    submitBtn.textContent = "Save changes";
+    actionsBlock.hidden = true;
+    setFormOpen(true);
   }
 
   openBtn.addEventListener("click", function () { setFormOpen(true); });
@@ -75,6 +107,31 @@
       condition: condition.value,
     };
     var orders = actions.values();
+
+    if (editing) {
+      var id = editing.id;
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Saving…";
+      P.db.from("admissions").update(row).eq("id", id).select().single()
+        .then(function (res) {
+          if (res.error) throw res.error;
+          resetForm();
+          setFormOpen(false);
+          P.toast("Changes saved", res.data.patient_name + " is updated.", "ok");
+          return refresh().then(function () {
+            var node = document.getElementById("a-" + id);
+            if (node) node.scrollIntoView({ behavior: "smooth", block: "center" });
+          });
+        })
+        .catch(function (error) {
+          showError(P.errorMessage(error));
+        })
+        .finally(function () {
+          submitBtn.disabled = false;
+          submitBtn.textContent = editing ? "Save changes" : "Add patient";
+        });
+      return;
+    }
 
     submitBtn.disabled = true;
     submitBtn.textContent = "Adding…";
@@ -150,11 +207,15 @@
               el("strong", { text: P.doctorName(p.created_by) }),
               el("span", { class: "entered-time", text: " · " + P.formatHM(p.created_at) }),
             ]),
-            mine ? P.confirmButton("Remove", function () {
+            mine ? P.ownerActions(function () { startEdit(p); }, "Remove", function () {
               P.db.from("admissions").delete().eq("id", p.id).then(function (res) {
                 if (res.error) {
                   P.toast("Not removed", P.errorMessage(res.error), "error");
                   return;
+                }
+                if (editing && editing.id === p.id) {
+                  resetForm();
+                  setFormOpen(false);
                 }
                 P.toast("Patient removed", p.patient_name + " was removed from the list.", "info");
                 refresh();

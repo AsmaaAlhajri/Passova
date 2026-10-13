@@ -388,3 +388,45 @@ alter table public.endorsements
   add column age_unit text not null default 'years' check (age_unit in ('hours', 'days', 'months', 'years'));
 alter table public.admissions
   add column age_unit text not null default 'years' check (age_unit in ('hours', 'days', 'months', 'years'));
+
+-- ---------- Whoever entered a row can edit it; nobody else can ----------
+-- The trigger arguments list the columns any doctor may still change
+-- (status, seen, synthesis, condition, done...).
+
+create function public.guard_owner_edit()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+declare
+  shared text[] := tg_argv;
+begin
+  if (to_jsonb(old) - shared) is distinct from (to_jsonb(new) - shared)
+     and (select auth.uid()) is distinct from old.created_by then
+    raise exception 'Only the doctor who entered this can edit it.' using errcode = '42501';
+  end if;
+  return new;
+end;
+$$;
+
+revoke execute on function public.guard_owner_edit() from public, anon, authenticated;
+
+create trigger endorsements_owner_edit
+  before update on public.endorsements
+  for each row execute function public.guard_owner_edit('status', 'status_by', 'status_at', 'seen_by', 'seen_at', 'synthesis');
+
+create trigger admissions_owner_edit
+  before update on public.admissions
+  for each row execute function public.guard_owner_edit('status', 'status_by', 'status_at', 'seen_by', 'seen_at', 'condition');
+
+create trigger reminders_owner_edit
+  before update on public.reminders
+  for each row execute function public.guard_owner_edit('done', 'done_by', 'done_at');
+
+grant update (ward, room, team, patient_name, age, age_unit, gender, severity,
+              working_diagnosis, summary, ongoing_assessment, plan, suggestions)
+  on public.endorsements to authenticated;
+grant update (ward, room, patient_name, age, age_unit, diagnosis)
+  on public.admissions to authenticated;
+grant update (text, due_at, endorsement_id, admission_id, patient_label)
+  on public.reminders to authenticated;

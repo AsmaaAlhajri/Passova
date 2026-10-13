@@ -2581,3 +2581,20 @@ textarea.input {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
   gap: 8px;
 }
+
+/* Edit / Remove on things the signed-in doctor entered */
+.owner-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+}
+
+.reminder .owner-actions {
+  margin-top: 4px;
+}
+
+.reminder .owner-actions .btn-text {
+  padding: 2px 0;
+  font-size: 12.5px;
+}

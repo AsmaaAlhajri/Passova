@@ -98,6 +98,7 @@
       ],
       reminders: [
         { id: "dr1", created_at: ago(20), created_by: THIRD, endorsement_id: null, admission_id: null, patient_label: "Salem Q., W4 R6", text: "Call radiology about his CT abdomen", due_at: null, done: false, done_by: null, done_at: null },
+        { id: "dr2", created_at: ago(10), created_by: ME, endorsement_id: "de3", admission_id: null, patient_label: null, text: "Re-mark cellulitis margins", due_at: ahead(90), done: false, done_by: null, done_at: null },
       ],
     };
   }
@@ -201,8 +202,8 @@
           r.done_by = ME;
           r.done_at = stamp;
         }
-        ["synthesis", "condition", "full_name", "position", "team", "phone"].forEach(function (k) {
-          if (k in p) r[k] = p[k];
+        Object.keys(p).forEach(function (k) {
+          if (k !== "status" && k !== "done") r[k] = p[k];
         });
       }
       save();

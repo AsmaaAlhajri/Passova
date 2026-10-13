@@ -8,6 +8,7 @@
   var board = null;
   var alerted = {};
   var firstLoad = true;
+  var me = null;
 
   P.renderShell("home");
 
@@ -64,9 +65,22 @@
         html: P.ICON.check + "<span>Done</span>",
       });
 
+      // Only the doctor who added a reminder can edit or delete it.
+      var mine = item.kind === "reminder" && me && row.created_by === me.user.id;
+      var owner = mine ? P.ownerActions(function () { openDialog(row); }, "Delete", function () {
+        P.db.from("reminders").delete().eq("id", row.id).then(function (res) {
+          if (res.error) {
+            P.toast("Reminder not deleted", P.errorMessage(res.error), "error");
+            return;
+          }
+          board.reminders = board.reminders.filter(function (r) { return r.id !== row.id; });
+          renderReminders();
+        });
+      }) : null;
+
       var li = el("li", { class: "reminder" + (due ? " is-due" : "") }, [
         el("div", { class: "reminder-icon", html: item.kind === "order" ? P.ICON.clipboard : P.ICON.bell }),
-        el("div", null, [el("p", { class: "reminder-text", text: item.text }), meta]),
+        el("div", null, [el("p", { class: "reminder-text", text: item.text }), meta, owner]),
         doneBtn,
       ]);
 
@@ -217,6 +231,9 @@
   var otherField = document.getElementById("reminder-other-field");
   var otherInput = document.getElementById("reminder-other");
   var reminderError = document.getElementById("reminder-error");
+  var dialogTitle = document.getElementById("dialog-title");
+  // The reminder being edited, or null when adding a new one.
+  var editing = null;
 
   // Every reminder is about a patient: one of this shift's, or "Other",
   // typed in by hand.
@@ -252,13 +269,31 @@
     if (patientSelect.value === "other") otherInput.focus();
   });
 
-  document.getElementById("add-reminder").addEventListener("click", function () {
+  // Opens the dialog empty to add a reminder, or filled in to edit `row`.
+  function openDialog(row) {
+    editing = row || null;
     form.reset();
     patientSelect.value = "";
     reminderError.hidden = true;
+    if (row) {
+      textInput.value = row.text;
+      if (row.endorsement_id) patientSelect.value = "e:" + row.endorsement_id;
+      else if (row.admission_id) patientSelect.value = "a:" + row.admission_id;
+      if (!patientSelect.value) {
+        patientSelect.value = "other";
+        otherInput.value = row.patient_label || "";
+      }
+      timeInput.value = row.due_at ? P.formatHM(row.due_at) : "";
+    }
+    dialogTitle.textContent = row ? "Edit reminder" : "Add a reminder";
+    saveBtn.textContent = row ? "Save changes" : "Add reminder";
     showOther();
     dialog.showModal();
     textInput.focus();
+  }
+
+  document.getElementById("add-reminder").addEventListener("click", function () {
+    openDialog(null);
   });
 
   document.getElementById("reminder-cancel").addEventListener("click", function () {
@@ -283,15 +318,26 @@
       patient_label: target === "other" ? other : null,
     };
     saveBtn.disabled = true;
-    P.db.from("reminders").insert(row).select().single().then(function (res) {
+    var request = editing
+      ? P.db.from("reminders").update(row).eq("id", editing.id).select().single()
+      : P.db.from("reminders").insert(row).select().single();
+    request.then(function (res) {
       saveBtn.disabled = false;
       if (res.error) {
         showReminderError(P.errorMessage(res.error));
         return;
       }
-      // Already overdue when added: show it red, without a pop-up.
-      if (P.isDue(res.data.due_at)) alerted["reminder" + res.data.id] = true;
-      board.reminders.push(res.data);
+      var key = "reminder" + res.data.id;
+      // A new time pops up again when it falls due; one already past when
+      // saved just shows red, without a pop-up.
+      delete alerted[key];
+      if (P.isDue(res.data.due_at)) alerted[key] = true;
+      if (editing) {
+        board.reminders = board.reminders.map(function (r) { return r.id === res.data.id ? res.data : r; });
+      } else {
+        board.reminders.push(res.data);
+      }
+      editing = null;
       dialog.close();
       renderReminders();
     });
@@ -299,7 +345,8 @@
 
   // ---------- Start ----------
 
-  P.requireAuth().then(function () {
+  P.requireAuth().then(function (session) {
+    me = session;
     P.fillDrawerUser();
     refresh();
     P.onDataChange(refresh);

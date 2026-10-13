@@ -109,6 +109,7 @@
     clock: svg('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'),
     check: svg('<path d="M20 6 9 17l-5-5"/>', { width: 2.4 }),
     plus: svg('<path d="M12 5v14M5 12h14"/>'),
+    edit: svg('<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>'),
     trash: svg('<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>'),
     info: svg('<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>'),
   };
@@ -594,6 +595,13 @@
     return btn;
   }
 
+  // Edit and Remove, shown only on what the signed-in doctor entered.
+  function ownerActions(onEdit, removeLabel, onRemove) {
+    var editBtn = el("button", { type: "button", class: "btn-text", html: ICON.edit + "<span>Edit</span>" });
+    editBtn.addEventListener("click", onEdit);
+    return el("div", { class: "owner-actions" }, [editBtn, confirmButton(removeLabel, onRemove)]);
+  }
+
   window.Passova = {
     db: db,
     el: el,
@@ -633,5 +641,6 @@
     bedLabel: bedLabel,
     formatAge: formatAge,
     confirmButton: confirmButton,
+    ownerActions: ownerActions,
   };
 })();

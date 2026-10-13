@@ -19,6 +19,10 @@
   var submitBtn = document.getElementById("submit-form");
   var errorBox = document.getElementById("form-error");
   var actions = P.actionListEditor(document.getElementById("action-editor"));
+  var actionsBlock = document.getElementById("action-editor").closest("fieldset");
+  var formTitle = document.getElementById("form-title");
+  // The endorsement being edited, or null when adding a new one.
+  var editing = null;
 
   function setFormOpen(open) {
     card.hidden = !open;
@@ -34,6 +38,35 @@
     form.reset();
     actions.reset();
     errorBox.hidden = true;
+    editing = null;
+    formTitle.textContent = "New endorsement";
+    submitBtn.textContent = "Submit endorsement";
+    actionsBlock.hidden = false;
+  }
+
+  // Load one of my endorsements into the form. Its orders stay on the card,
+  // where they can be ticked off or added to.
+  function startEdit(p) {
+    resetForm();
+    editing = p;
+    var set = function (id, v) { document.getElementById(id).value = v === null || v === undefined ? "" : v; };
+    set("patient-name", p.patient_name);
+    set("age", p.age);
+    set("age-unit", p.age_unit || "years");
+    set("gender", p.gender);
+    set("ward", p.ward);
+    set("room", p.room);
+    set("team", p.team);
+    set("working-diagnosis", p.working_diagnosis);
+    set("summary", p.summary);
+    set("plan", p.plan);
+    set("suggestions", p.suggestions);
+    var radio = form.querySelector('input[name=severity][value="' + p.severity + '"]');
+    if (radio) radio.checked = true;
+    formTitle.textContent = "Edit endorsement · " + p.patient_name;
+    submitBtn.textContent = "Save changes";
+    actionsBlock.hidden = true;
+    setFormOpen(true);
   }
 
   openBtn.addEventListener("click", function () { setFormOpen(true); });
@@ -82,6 +115,31 @@
       suggestions: val("suggestions"),
     };
     var orders = actions.values();
+
+    if (editing) {
+      var id = editing.id;
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Saving…";
+      P.db.from("endorsements").update(row).eq("id", id).select().single()
+        .then(function (res) {
+          if (res.error) throw res.error;
+          resetForm();
+          setFormOpen(false);
+          P.toast("Changes saved", res.data.patient_name + "'s endorsement is updated.", "ok");
+          return refresh().then(function () {
+            var node = document.getElementById("e-" + id);
+            if (node) node.scrollIntoView({ behavior: "smooth", block: "center" });
+          });
+        })
+        .catch(function (error) {
+          showError(P.errorMessage(error));
+        })
+        .finally(function () {
+          submitBtn.disabled = false;
+          submitBtn.textContent = editing ? "Save changes" : "Submit endorsement";
+        });
+      return;
+    }
 
     submitBtn.disabled = true;
     submitBtn.textContent = "Submitting…";
@@ -239,11 +297,15 @@
           el("strong", { text: P.doctorName(p.created_by) }),
           el("span", { class: "entered-time", text: " · " + P.formatHM(p.created_at) }),
         ]),
-        mine ? P.confirmButton("Remove", function () {
+        mine ? P.ownerActions(function () { startEdit(p); }, "Remove", function () {
           P.db.from("endorsements").delete().eq("id", p.id).then(function (res) {
             if (res.error) {
               P.toast("Not removed", P.errorMessage(res.error), "error");
               return;
+            }
+            if (editing && editing.id === p.id) {
+              resetForm();
+              setFormOpen(false);
             }
             P.toast("Endorsement removed", p.patient_name + " was removed from the list.", "info");
             refresh();
