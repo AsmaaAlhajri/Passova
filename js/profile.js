@@ -72,9 +72,24 @@
       });
   });
 
+  // Every patient or endorsement this doctor has marked as seen, counted by
+  // the database from its permanent seen log.
+  function loadCounts() {
+    P.db.rpc("my_seen_counts").then(function (res) {
+      if (res.error) {
+        P.toast("Could not load your counts", P.errorMessage(res.error), "error");
+        return;
+      }
+      var row = (res.data && res.data[0]) || { this_month: 0, all_time: 0 };
+      field("seen-month").textContent = row.this_month;
+      field("seen-all").textContent = row.all_time;
+    });
+  }
+
   P.requireAuth().then(function (session) {
     me = session;
     P.fillDrawerUser();
+    loadCounts();
     fillForm(me.profile);
     showProfile(me.profile);
     if (!me.profile || !me.profile.full_name) field("full-name").focus();

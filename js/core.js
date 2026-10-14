@@ -103,6 +103,7 @@
     endorse: svg('<path d="M9 3h6v4H9zM15 5h3a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h3M9 12h6M9 16h4"/>'),
     admit: svg('<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM19 8v6M22 11h-6"/>'),
     profile: svg('<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>'),
+    trophy: svg('<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4ZM7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3"/>'),
     signout: svg('<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>'),
     bell: svg('<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0"/>'),
     clipboard: svg('<path d="M9 3h6v4H9zM15 5h3a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h3M9 12h6M9 16h4"/>'),
@@ -208,6 +209,7 @@
     { id: "home", href: "home.html", label: "Home", icon: ICON.home },
     { id: "endorsement", href: "endorsement.html", label: "Endorsement", icon: ICON.endorse },
     { id: "admissions", href: "admissions.html", label: "New admissions", icon: ICON.admit },
+    { id: "top", href: "top-doctors.html", label: "Top doctors", icon: ICON.trophy },
     { id: "profile", href: "profile.html", label: "My profile", icon: ICON.profile },
   ];
 

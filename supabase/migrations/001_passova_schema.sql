@@ -430,3 +430,103 @@ grant update (ward, room, patient_name, age, age_unit, diagnosis)
   on public.admissions to authenticated;
 grant update (text, due_at, endorsement_id, admission_id, patient_label)
   on public.reminders to authenticated;
+
+-- ---------- Seen log, personal counts and the monthly top doctors ----------
+-- A permanent record of every time a doctor marks a patient as seen. It
+-- survives the daily clear and patients being removed, so counts and the
+-- monthly top doctors stay accurate.
+
+create table public.seen_log (
+  id bigint generated always as identity primary key,
+  doctor_id uuid not null references public.profiles (id) on delete cascade,
+  endorsement_id uuid references public.endorsements (id) on delete set null,
+  admission_id uuid references public.admissions (id) on delete set null,
+  seen_at timestamptz not null default now()
+);
+
+create index seen_log_doctor_seen_at_idx on public.seen_log (doctor_id, seen_at);
+create index seen_log_seen_at_idx on public.seen_log (seen_at);
+create index seen_log_endorsement_idx on public.seen_log (endorsement_id);
+create index seen_log_admission_idx on public.seen_log (admission_id);
+
+alter table public.seen_log enable row level security;
+
+create policy "Doctors can see the seen log"
+  on public.seen_log for select to authenticated using (true);
+
+revoke all on public.seen_log from anon, authenticated;
+grant select on public.seen_log to authenticated;
+
+-- Written only by this trigger, never directly by the pages.
+create function public.log_seen()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if new.status = 'seen' and old.status is distinct from 'seen' and new.seen_by is not null then
+    insert into public.seen_log (doctor_id, endorsement_id, admission_id, seen_at)
+    values (
+      new.seen_by,
+      case when tg_table_name = 'endorsements' then new.id end,
+      case when tg_table_name = 'admissions' then new.id end,
+      coalesce(new.seen_at, now())
+    );
+  end if;
+  return null;
+end;
+$$;
+
+revoke execute on function public.log_seen() from public, anon, authenticated;
+
+create trigger endorsements_log_seen
+  after update on public.endorsements
+  for each row execute function public.log_seen();
+
+create trigger admissions_log_seen
+  after update on public.admissions
+  for each row execute function public.log_seen();
+
+-- Anything already marked seen counts too.
+insert into public.seen_log (doctor_id, endorsement_id, seen_at)
+  select seen_by, id, seen_at from public.endorsements where status = 'seen' and seen_by is not null;
+insert into public.seen_log (doctor_id, admission_id, seen_at)
+  select seen_by, id, seen_at from public.admissions where status = 'seen' and seen_by is not null;
+
+-- The signed-in doctor's counts: this calendar month (Kuwait time) and all time.
+create function public.my_seen_counts()
+returns table (this_month bigint, all_time bigint)
+language sql
+stable
+set search_path = ''
+as $$
+  select
+    count(*) filter (
+      where seen_at >= (date_trunc('month', now() at time zone 'Asia/Kuwait') at time zone 'Asia/Kuwait')
+    ),
+    count(*)
+  from public.seen_log
+  where doctor_id = (select auth.uid());
+$$;
+
+-- Doctors ranked by patients marked seen between two moments (a month).
+create function public.seen_leaderboard(month_start timestamptz, month_end timestamptz)
+returns table (doctor_id uuid, full_name text, "position" text, seen_count bigint)
+language sql
+stable
+set search_path = ''
+as $$
+  select l.doctor_id, p.full_name, p.position, count(*) as seen_count
+  from public.seen_log l
+  join public.profiles p on p.id = l.doctor_id
+  where l.seen_at >= month_start and l.seen_at < month_end
+  group by l.doctor_id, p.full_name, p.position
+  order by count(*) desc, max(l.seen_at) asc
+  limit 50;
+$$;
+
+revoke execute on function public.my_seen_counts() from public, anon;
+revoke execute on function public.seen_leaderboard(timestamptz, timestamptz) from public, anon;
+grant execute on function public.my_seen_counts() to authenticated;
+grant execute on function public.seen_leaderboard(timestamptz, timestamptz) to authenticated;

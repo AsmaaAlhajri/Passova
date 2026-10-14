@@ -8,10 +8,45 @@
   "use strict";
 
   var FLAG = "passova-demo";
-  var STORE = "passova-demo-data";
+  var STORE = "passova-demo-data-v2";
   var ME = "d0000000-0000-0000-0000-000000000001";
   var OTHER = "d0000000-0000-0000-0000-000000000002";
   var THIRD = "d0000000-0000-0000-0000-000000000003";
+  var FOURTH = "d0000000-0000-0000-0000-000000000004";
+  var FIFTH = "d0000000-0000-0000-0000-000000000005";
+  var KUWAIT_OFFSET_MS = 3 * 3600000;
+
+  // Start of the Kuwait calendar month `back` months ago, in ms.
+  function monthStart(back) {
+    var k = new Date(Date.now() + KUWAIT_OFFSET_MS);
+    return Date.UTC(k.getUTCFullYear(), k.getUTCMonth() - back, 1) - KUWAIT_OFFSET_MS;
+  }
+
+  // A made-up history of who marked patients as seen, so My profile and
+  // Top doctors have something to show.
+  function seedSeenLog() {
+    var log = [];
+    var now = Date.now();
+    function spread(doctor, count, from, to) {
+      for (var i = 0; i < count; i++) {
+        log.push({ doctor_id: doctor, seen_at: new Date(from + (to - from) * (i + 0.5) / count).toISOString() });
+      }
+    }
+    var thisStart = monthStart(0);
+    var lastStart = monthStart(1);
+    spread(THIRD, 14, thisStart, now);
+    spread(OTHER, 11, thisStart, now);
+    spread(ME, 9, thisStart, now);
+    spread(FOURTH, 7, thisStart, now);
+    spread(FIFTH, 4, thisStart, now);
+    spread(OTHER, 18, lastStart, thisStart);
+    spread(FOURTH, 15, lastStart, thisStart);
+    spread(THIRD, 12, lastStart, thisStart);
+    spread(ME, 10, lastStart, thisStart);
+    spread(FIFTH, 6, lastStart, thisStart);
+    spread(ME, 21, monthStart(2), lastStart);
+    return log;
+  }
 
   function read(key) {
     try { return window.sessionStorage.getItem(key); } catch (e) { return null; }
@@ -39,6 +74,8 @@
         { id: ME, full_name: "Demo Doctor", position: "Registrar", team: 1, phone: null },
         { id: OTHER, full_name: "Faisal Al-Mutawa", position: "Resident", team: 2, phone: null },
         { id: THIRD, full_name: "Reem Al-Saleh", position: "Specialist", team: 3, phone: null },
+        { id: FOURTH, full_name: "Sara Al-Enezi", position: "Senior Registrar", team: 2, phone: null },
+        { id: FIFTH, full_name: "Mohammed Al-Kandari", position: "Resident", team: 3, phone: null },
       ],
       endorsements: [
         {
@@ -100,6 +137,7 @@
         { id: "dr1", created_at: ago(20), created_by: THIRD, endorsement_id: null, admission_id: null, patient_label: "Salem Q., W4 R6", text: "Call radiology about his CT abdomen", due_at: null, done: false, done_by: null, done_at: null },
         { id: "dr2", created_at: ago(10), created_by: ME, endorsement_id: "de3", admission_id: null, patient_label: null, text: "Re-mark cellulitis margins", due_at: ahead(90), done: false, done_by: null, done_at: null },
       ],
+      seen_log: seedSeenLog(),
     };
   }
 
@@ -193,6 +231,7 @@
           r.status_by = ME;
           r.status_at = stamp;
           if (r.status === "seen") {
+            db.seen_log.push({ doctor_id: ME, seen_at: stamp });
             r.seen_by = ME;
             r.seen_at = stamp;
           }
@@ -232,6 +271,39 @@
     }).then(ok, bad);
   };
 
+  // The two database functions the pages call.
+  function rpc(name, args) {
+    var db = load();
+    var data = null;
+    if (name === "my_seen_counts") {
+      var since = new Date(monthStart(0)).toISOString();
+      var mine = db.seen_log.filter(function (l) { return l.doctor_id === ME; });
+      data = [{
+        this_month: mine.filter(function (l) { return l.seen_at >= since; }).length,
+        all_time: mine.length,
+      }];
+    } else if (name === "seen_leaderboard") {
+      var tally = {};
+      db.seen_log.forEach(function (l) {
+        if (l.seen_at < args.month_start || l.seen_at >= args.month_end) return;
+        var t = tally[l.doctor_id] || (tally[l.doctor_id] = { count: 0, last: "" });
+        t.count++;
+        if (l.seen_at > t.last) t.last = l.seen_at;
+      });
+      data = Object.keys(tally).map(function (id) {
+        var p = db.profiles.find(function (x) { return x.id === id; }) || {};
+        return { doctor_id: id, full_name: p.full_name || "", position: p.position || null, seen_count: tally[id].count, last: tally[id].last };
+      }).sort(function (a, b) {
+        return b.seen_count - a.seen_count || a.last.localeCompare(b.last);
+      });
+    } else {
+      return Promise.resolve({ data: null, error: { message: "Not available in the demo." } });
+    }
+    return new Promise(function (resolve) {
+      window.setTimeout(function () { resolve({ data: data, error: null }); }, 60);
+    });
+  }
+
   function createClient() {
     var session = { user: { id: ME, email: "demo@passova.app" } };
     return {
@@ -244,6 +316,7 @@
           return Promise.resolve({ error: null });
         },
       },
+      rpc: rpc,
       channel: function () {
         return { on: function () { return this; }, subscribe: function () { return this; } };
       },
