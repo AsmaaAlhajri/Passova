@@ -36,15 +36,32 @@
     return items;
   }
 
+  // Finished orders and reminders, oldest first, for the bottom of the list.
+  function doneItems() {
+    var items = [];
+    board.orders.forEach(function (o) {
+      if (o.done) items.push({ kind: "order", row: o, text: o.label });
+    });
+    board.reminders.forEach(function (r) {
+      if (r.done) items.push({ kind: "reminder", row: r, text: r.text });
+    });
+    return items.sort(function (a, b) {
+      return String(a.row.done_at).localeCompare(String(b.row.done_at));
+    });
+  }
+
   function renderReminders() {
     var list = document.getElementById("reminder-list");
-    var items = activeItems();
+    var active = activeItems();
+    var finished = doneItems();
     list.textContent = "";
 
-    items.forEach(function (item) {
+    // Still to do first; anything marked done stays, at the bottom.
+    active.concat(finished).forEach(function (item) {
       var row = item.row;
       var patient = patientFor(row);
-      var due = P.isDue(row.due_at);
+      var done = !!row.done;
+      var due = !done && P.isDue(row.due_at);
 
       var meta = el("div", { class: "reminder-meta" }, [
         patient ? el("span", { class: "tag tag-bed", text: P.bedLabel(patient) }) : null,
@@ -54,20 +71,24 @@
           class: "tag " + (item.kind === "order" ? "tag-order" : "tag-manual"),
           text: item.kind === "order" ? "Pending order" : "Added by " + P.doctorName(row.created_by),
         }),
-        due
-          ? el("span", { class: "tag tag-due", text: "Due " + P.formatHM(row.due_at) })
-          : el("span", { class: "reminder-time", text: row.due_at ? "At " + P.formatHM(row.due_at) : "Any time" }),
+        done
+          ? el("span", { class: "reminder-done-by", text: "Done by " + P.doctorName(row.done_by) + " · " + P.formatHM(row.done_at) })
+          : due
+            ? el("span", { class: "tag tag-due", text: "Due " + P.formatHM(row.due_at) })
+            : el("span", { class: "reminder-time", text: row.due_at ? "At " + P.formatHM(row.due_at) : "Any time" }),
       ]);
 
-      var doneBtn = el("button", {
-        class: "reminder-done", type: "button",
-        "aria-label": "Mark “" + item.text + "” as done",
-        html: P.ICON.check + "<span>Done</span>",
-      });
+      var doneBtn = done
+        ? el("span", { class: "reminder-done is-done", html: P.ICON.check + "<span>Done</span>" })
+        : el("button", {
+            class: "reminder-done", type: "button",
+            "aria-label": "Mark “" + item.text + "” as done",
+            html: P.ICON.check + "<span>Done</span>",
+          });
 
-      // Only the doctor who added a reminder can edit or delete it.
-      var mine = item.kind === "reminder" && me && row.created_by === me.user.id;
-      var owner = mine ? P.ownerActions(function () { openDialog(row); }, "Delete", function () {
+      // Only the doctor who added a reminder can edit or delete it; once it
+      // is done it can only be deleted.
+      function remove() {
         P.db.from("reminders").delete().eq("id", row.id).then(function (res) {
           if (res.error) {
             P.toast("Reminder not deleted", P.errorMessage(res.error), "error");
@@ -76,37 +97,41 @@
           board.reminders = board.reminders.filter(function (r) { return r.id !== row.id; });
           renderReminders();
         });
-      }) : null;
+      }
+      var mine = item.kind === "reminder" && me && row.created_by === me.user.id;
+      var owner = !mine ? null
+        : done ? el("div", { class: "owner-actions" }, [P.confirmButton("Delete", remove)])
+        : P.ownerActions(function () { openDialog(row); }, "Delete", remove);
 
-      var li = el("li", { class: "reminder" + (due ? " is-due" : "") }, [
+      var li = el("li", { class: "reminder" + (due ? " is-due" : "") + (done ? " is-done" : "") }, [
         el("div", { class: "reminder-icon", html: item.kind === "order" ? P.ICON.clipboard : P.ICON.bell }),
         el("div", null, [el("p", { class: "reminder-text", text: item.text }), meta, owner]),
         doneBtn,
       ]);
 
-      doneBtn.addEventListener("click", function () {
-        doneBtn.disabled = true;
-        li.classList.add("is-leaving");
-        P.db.from(item.kind === "order" ? "orders" : "reminders")
-          .update({ done: true }).eq("id", row.id)
-          .then(function (res) {
-            if (res.error) {
-              li.classList.remove("is-leaving");
-              doneBtn.disabled = false;
-              P.toast("Not marked as done", P.errorMessage(res.error), "error");
-              return;
-            }
-            row.done = true;
-            renderAll();
-          });
-      });
+      if (!done) {
+        doneBtn.addEventListener("click", function () {
+          doneBtn.disabled = true;
+          P.db.from(item.kind === "order" ? "orders" : "reminders")
+            .update({ done: true }).eq("id", row.id).select().single()
+            .then(function (res) {
+              if (res.error) {
+                doneBtn.disabled = false;
+                P.toast("Not marked as done", P.errorMessage(res.error), "error");
+                return;
+              }
+              Object.assign(row, res.data);
+              renderAll();
+            });
+        });
+      }
 
       list.appendChild(li);
     });
 
-    document.getElementById("reminder-count").textContent = items.length;
-    document.getElementById("reminders-empty").hidden = items.length > 0;
-    list.hidden = items.length === 0;
+    document.getElementById("reminder-count").textContent = active.length;
+    document.getElementById("reminders-empty").hidden = active.length > 0;
+    list.hidden = active.length + finished.length === 0;
   }
 
   // Pop up anything that has just fallen due. Items already overdue when the
