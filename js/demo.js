@@ -1,6 +1,7 @@
 // Demo mode: lets someone look around Passova without an account.
 //
-// Turned on by the "Try the demo" button on the sign-in and sign-up pages.
+// Turned on by the "Try the demo" or "Try the admin demo" buttons on the
+// sign-in and sign-up pages; the admin demo adds the admin-only pages.
 // It swaps the Supabase client for a small stand-in that keeps sample data
 // in this browser tab (sessionStorage) only: nothing reaches the real
 // database, and closing the tab or leaving the demo throws it all away.
@@ -8,7 +9,7 @@
   "use strict";
 
   var FLAG = "passova-demo";
-  var STORE = "passova-demo-data-v2";
+  var STORE = "passova-demo-data-v3";
   var ME = "d0000000-0000-0000-0000-000000000001";
   var OTHER = "d0000000-0000-0000-0000-000000000002";
   var THIRD = "d0000000-0000-0000-0000-000000000003";
@@ -60,6 +61,69 @@
 
   var memory = null;
 
+  function adminDemo() {
+    return read(FLAG) === "admin";
+  }
+
+  // Past shifts for the admin's History page: older than today's shift, so
+  // the regular pages never show them.
+  function seedHistory(shiftStart) {
+    var out = { endorsements: [], admissions: [], orders: [] };
+    var who = [OTHER, THIRD, FOURTH, FIFTH, ME];
+    var endorsed = [
+      ["Fahad R.", 72, "male", "watcher", "Upper GI bleed", "W1", "R4"],
+      ["Latifa S.", 55, "female", "stable", "Diabetic foot infection", "W2", "R8"],
+      ["Bader K.", 81, "male", "unstable", "Septic shock, likely urinary source", "W3", "R2"],
+      ["Hessa M.", 29, "female", "stable", "Pyelonephritis", "W1", "R12"],
+      ["Talal A.", 63, "male", "watcher", "COPD exacerbation", "W2", "R3"],
+      ["Shaikha N.", 47, "female", "stable", "Hypokalaemia, replacing", "W3", "R7"],
+      ["Jassim H.", 68, "male", "watcher", "New atrial fibrillation", "W1", "R9"],
+    ];
+    var admitted = [
+      ["Mona Q.", 34, "years", "Acute asthma", "stable", "W2", "R6"],
+      ["Ali B.", 9, "days", "Neonatal jaundice", "stable", "W3", "R1"],
+      ["Ibrahim F.", 77, "years", "Stroke, left MCA", "unstable", "W1", "R15"],
+      ["Dana T.", 52, "years", "DKA", "watcher", "W2", "R10"],
+      ["Waleed S.", 41, "years", "Cellulitis, right arm", "stable", "W3", "R11"],
+      ["Nour A.", 6, "months", "Bronchiolitis", "watcher", "W1", "R3"],
+      ["Saad M.", 59, "years", "Chest pain, NSTEMI", "unstable", "W2", "R14"],
+    ];
+    function at(daysBack, hour) {
+      return new Date(shiftStart - daysBack * 86400000 + hour * 3600000).toISOString();
+    }
+    endorsed.forEach(function (e, i) {
+      var days = 1 + i * 4;
+      var by = who[i % who.length];
+      var seenBy = who[(i + 2) % who.length];
+      var id = "he" + i;
+      out.endorsements.push({
+        id: id, created_at: at(days, 9 + i), created_by: by, ward: e[5], room: e[6], team: (i % 3) + 1,
+        patient_name: e[0], age: e[1], age_unit: "years", gender: e[2], severity: e[3], working_diagnosis: e[4],
+        summary: e[1] + (e[2] === "male" ? "M" : "F") + ". Handed over at the evening meeting.",
+        ongoing_assessment: "", plan: "Continue current management; review bloods in the morning.",
+        suggestions: "If deteriorates, then call the on-call registrar.",
+        synthesis: i % 2 ? "Agreed plan; will review at 22:00." : "",
+        status: "seen", status_by: seenBy, status_at: at(days, 11 + i), seen_by: seenBy, seen_at: at(days, 11 + i),
+        deleted_at: i === 3 ? at(days, 12 + i) : null,
+      });
+      out.orders.push({ id: "ho" + i, created_at: at(days, 9 + i), created_by: by, endorsement_id: id, admission_id: null,
+        label: "Repeat bloods", due_at: null, done: true, done_by: seenBy, done_at: at(days, 13 + i) });
+    });
+    admitted.forEach(function (a, i) {
+      var days = 2 + i * 4;
+      var by = who[(i + 1) % who.length];
+      var seenBy = who[(i + 3) % who.length];
+      out.admissions.push({
+        id: "ha" + i, created_at: at(days, 14 + i), created_by: by, ward: a[5], room: a[6],
+        patient_name: a[0], age: a[1], age_unit: a[2], diagnosis: a[3], condition: a[4],
+        status: i === 4 ? "reassess" : "seen", status_by: seenBy, status_at: at(days, 15 + i),
+        seen_by: i === 4 ? null : seenBy, seen_at: i === 4 ? null : at(days, 15 + i),
+        deleted_at: i === 5 ? at(days, 16 + i) : null,
+      });
+    });
+    return out;
+  }
+
   function seed() {
     var now = Date.now();
     // Keep the sample inside the current 08:00–08:00 Kuwait shift, or the
@@ -69,9 +133,11 @@
     var room = Math.max(now - shiftStart - 60000, 0);
     function ago(min) { return new Date(now - Math.min(min * 60000, room * min / 100)).toISOString(); }
     function ahead(min) { return new Date(now + min * 60000).toISOString(); }
-    return {
+    var past = seedHistory(shiftStart);
+    var admin = adminDemo();
+    var seeded = {
       profiles: [
-        { id: ME, full_name: "Demo Doctor", position: "Registrar", team: 1, phone: null },
+        { id: ME, full_name: admin ? "Demo Admin" : "Demo Doctor", position: admin ? "Consultant" : "Registrar", team: 1, phone: null, is_admin: admin },
         { id: OTHER, full_name: "Faisal Al-Mutawa", position: "Resident", team: 2, phone: null },
         { id: THIRD, full_name: "Reem Al-Saleh", position: "Specialist", team: 3, phone: null },
         { id: FOURTH, full_name: "Sara Al-Enezi", position: "Senior Registrar", team: 2, phone: null },
@@ -138,7 +204,18 @@
         { id: "dr2", created_at: ago(10), created_by: ME, endorsement_id: "de3", admission_id: null, patient_label: null, text: "Re-mark cellulitis margins", due_at: ahead(90), done: false, done_by: null, done_at: null },
       ],
       seen_log: seedSeenLog(),
+      allowed_emails: [
+        { email: "faisal.almutawa@hospital.kw", added_at: ago(90), added_by: ME, has_account: true },
+        { email: "reem.alsaleh@hospital.kw", added_at: ago(80), added_by: ME, has_account: true },
+        { email: "sara.alenezi@hospital.kw", added_at: ago(60), added_by: ME, has_account: true },
+        { email: "new.resident@hospital.kw", added_at: ago(5), added_by: ME, has_account: false },
+      ],
     };
+    // Today's patients come first; past shifts go after them for History.
+    seeded.endorsements = seeded.endorsements.concat(past.endorsements);
+    seeded.admissions = seeded.admissions.concat(past.admissions);
+    seeded.orders = seeded.orders.concat(past.orders);
+    return seeded;
   }
 
   function load() {
@@ -178,7 +255,19 @@
     this.one = false;
   }
   Query.prototype.select = function () { return this; };
-  Query.prototype.order = function () { return this; };
+  Query.prototype.order = function (col, opts) {
+    this.sortCol = col;
+    this.sortDesc = !!(opts && opts.ascending === false);
+    return this;
+  };
+  Query.prototype.lt = function (col, v) {
+    this.filters.push(function (r) { return r[col] < v; });
+    return this;
+  };
+  Query.prototype.is = function (col, v) {
+    this.filters.push(function (r) { return v === null ? r[col] === null || r[col] === undefined : r[col] === v; });
+    return this;
+  };
   Query.prototype.single = function () { this.one = true; return this; };
   Query.prototype.gte = function (col, v) {
     this.filters.push(function (r) { return r[col] >= v; });
@@ -201,12 +290,24 @@
 
     if (self.op === "select") {
       var found = rows.filter(match).map(copy);
+      if (self.sortCol) {
+        found.sort(function (a, b) {
+          var x = String(a[self.sortCol]);
+          var y = String(b[self.sortCol]);
+          return self.sortDesc ? y.localeCompare(x) : x.localeCompare(y);
+        });
+      }
       return { data: self.one ? found[0] || null : found, error: null };
     }
 
     if (self.op === "insert") {
       var list = Array.isArray(self.payload) ? self.payload : [self.payload];
       var made = list.map(function (p) {
+        if (self.table === "allowed_emails") {
+          var a = { email: String(p.email).trim().toLowerCase(), added_at: stamp, added_by: ME, has_account: false };
+          rows.unshift(a);
+          return copy(a);
+        }
         var r = Object.assign({}, p, { id: newId(), created_at: stamp, created_by: ME });
         if (PATIENT_TABLES[self.table]) {
           Object.assign(r, { status: "not_seen", status_by: null, status_at: null, seen_by: null, seen_at: null });
@@ -282,6 +383,14 @@
         this_month: mine.filter(function (l) { return l.seen_at >= since; }).length,
         all_time: mine.length,
       }];
+    } else if (name === "remove_patient") {
+      var table = args.p_kind === "endorsement" ? db.endorsements : db.admissions;
+      var row = table.find(function (r) { return r.id === args.p_id && r.created_by === ME && !r.deleted_at; });
+      if (!row) return Promise.resolve({ data: null, error: { message: "Only the doctor who entered this can remove it." } });
+      row.deleted_at = new Date().toISOString();
+      save();
+    } else if (name === "admin_allowed_emails") {
+      data = adminDemo() ? db.allowed_emails.map(copy) : [];
     } else if (name === "seen_leaderboard") {
       var tally = {};
       db.seen_log.forEach(function (l) {
@@ -305,7 +414,7 @@
   }
 
   function createClient() {
-    var session = { user: { id: ME, email: "demo@passova.app" } };
+    var session = { user: { id: ME, email: adminDemo() ? "admin@passova.app" : "demo@passova.app" } };
     return {
       from: function (table) { return new Query(table); },
       auth: {
@@ -323,8 +432,8 @@
     };
   }
 
-  function start() {
-    write(FLAG, "1");
+  function start(asAdmin) {
+    write(FLAG, asAdmin ? "admin" : "1");
     remove(STORE);
     memory = null;
   }
@@ -336,7 +445,8 @@
   }
 
   window.PassovaDemo = {
-    active: function () { return read(FLAG) === "1"; },
+    active: function () { return read(FLAG) === "1" || read(FLAG) === "admin"; },
+    isAdmin: adminDemo,
     start: start,
     stop: stop,
     createClient: createClient,

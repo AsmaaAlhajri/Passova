@@ -2903,3 +2903,364 @@ textarea.input {
     padding: 18px;
   }
 }
+
+/* =========================================================
+   ADMIN
+   ========================================================= */
+
+.btn-demo-admin {
+  margin-top: -6px;
+  background: var(--navy);
+  border-color: var(--navy);
+  color: var(--white);
+}
+
+.btn-demo-admin:hover {
+  background: var(--blue-deep);
+}
+
+/* Menu: the admin section and badge */
+.nav-admin {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 12px 2px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #c9b8ff;
+}
+
+.nav-admin svg {
+  width: 14px;
+  height: 14px;
+}
+
+.drawer-user .admin-badge {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: rgba(169, 150, 234, 0.25);
+  color: #e4dcff !important;
+  font-size: 11px !important;
+  font-weight: 700;
+}
+
+.drawer-user .admin-badge svg {
+  width: 12px;
+  height: 12px;
+}
+
+.search-input {
+  max-width: 280px;
+  min-height: 40px;
+  padding: 8px 12px;
+}
+
+/* ---------- Approved emails ---------- */
+
+.form-card form > .section-title {
+  margin-bottom: -4px;
+}
+
+.email-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.email-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+}
+
+.email-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--blue-mist);
+  color: var(--blue);
+}
+
+.email-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.email-main p {
+  margin: 0;
+}
+
+.email-address {
+  font-weight: 600;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.email-meta {
+  font-size: 12.5px;
+  color: var(--gray-400);
+}
+
+.tag-signed-up {
+  background: var(--status-seen-soft);
+  color: var(--status-seen);
+}
+
+.tag-waiting {
+  background: var(--gray-100);
+  color: var(--gray-500);
+  box-shadow: inset 0 0 0 1px var(--gray-200);
+}
+
+/* ---------- History ---------- */
+
+.history-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.history-tools .search-input {
+  flex: 1 1 220px;
+  max-width: 360px;
+}
+
+.history-summary {
+  margin: -8px 0 0;
+  font-size: 13px;
+  color: var(--gray-500);
+}
+
+.history-list {
+  display: grid;
+  gap: 22px;
+}
+
+.history-group {
+  display: grid;
+  gap: 10px;
+}
+
+.history-shift {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.history-shift .muted {
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.history-card {
+  display: grid;
+  gap: 6px;
+  padding: 14px 18px;
+  border-radius: var(--radius);
+}
+
+.history-card.is-removed {
+  background: var(--gray-100);
+  border-style: dashed;
+}
+
+.history-card.is-removed .history-name {
+  color: var(--gray-500);
+}
+
+.history-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.tag-kind-endorse {
+  background: var(--blue-soft);
+  color: var(--blue-deep);
+}
+
+.tag-kind-admit {
+  background: var(--purple-soft);
+  color: var(--purple-deep);
+}
+
+.tag-removed {
+  background: var(--white);
+  color: var(--status-not-seen);
+  box-shadow: inset 0 0 0 1px rgba(196, 61, 82, 0.35);
+}
+
+.history-name {
+  margin: 4px 0 0;
+  font-size: 16px;
+  color: var(--ink);
+}
+
+.history-name .muted {
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+.history-dx {
+  margin: 0;
+  color: var(--gray-700);
+}
+
+.history-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 16px;
+  margin: 2px 0 0;
+  font-size: 12.5px;
+  color: var(--gray-500);
+}
+
+.history-status {
+  font-weight: 600;
+}
+
+.status-text-seen {
+  color: var(--status-seen);
+}
+
+.status-text-reassess {
+  color: var(--status-reassess);
+}
+
+.status-text-not-seen {
+  color: var(--status-not-seen);
+}
+
+.history-card > .btn-text {
+  padding: 2px 0;
+  font-size: 13px;
+}
+
+.history-details {
+  display: grid;
+  gap: 10px;
+  margin-top: 4px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--gray-100);
+}
+
+.history-details[hidden] {
+  display: none;
+}
+
+.history-detail p {
+  margin: 2px 0 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.history-orders {
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13.5px;
+}
+
+.history-orders li.is-done > span:first-child {
+  color: var(--status-seen);
+}
+
+/* ---------- Admin card on My profile ---------- */
+
+.admin-card {
+  display: grid;
+  gap: 14px;
+  padding: 20px 24px;
+  border-color: rgba(91, 63, 168, 0.25);
+  background: linear-gradient(135deg, var(--purple-mist), var(--white));
+}
+
+.admin-card[hidden] {
+  display: none;
+}
+
+.admin-card-head {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.admin-card-head .section-sub {
+  margin-top: 4px;
+}
+
+.admin-card-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--purple-deep);
+  color: var(--white);
+}
+
+.admin-card-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.admin-card .btn {
+  justify-self: start;
+}
+
+.handover-note {
+  margin: 0;
+  padding: 11px 14px;
+  border-radius: 10px;
+  background: var(--purple-mist);
+  border: 1px solid var(--purple-soft);
+  color: var(--purple-deep);
+  font-size: 13.5px;
+}
+
+@media (max-width: 820px) {
+  .email-row {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .email-row .tag,
+  .email-row .btn-text {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .search-input {
+    max-width: none;
+    width: 100%;
+  }
+
+  .history-card {
+    padding: 12px 14px;
+  }
+
+  .admin-card {
+    padding: 18px;
+  }
+}

@@ -51,7 +51,7 @@
         phone: field("phone").value.trim() || null,
       })
       .eq("id", me.user.id)
-      .select("id, full_name, position, team, phone")
+      .select("id, full_name, position, team, phone, is_admin")
       .single()
       .then(function (res) {
         if (res.error) {
@@ -86,9 +86,54 @@
     });
   }
 
+  // ---------- Admin: hand over the role ----------
+  // The button and window are in place, but handing over is not switched on
+  // yet: submitting only explains that. Turning it on means adding a
+  // database function that moves is_admin to the new doctor's profile.
+  var HANDOVER_ENABLED = false;
+
+  var handover = document.getElementById("handover-dialog");
+  var handoverForm = document.getElementById("handover-form");
+  var handoverEmail = document.getElementById("handover-email");
+  var handoverError = document.getElementById("handover-error");
+  var handoverNote = document.getElementById("handover-note");
+
+  document.getElementById("step-down").addEventListener("click", function () {
+    handoverForm.reset();
+    handoverError.hidden = true;
+    handoverNote.hidden = true;
+    handover.showModal();
+    handoverEmail.focus();
+  });
+  document.getElementById("handover-cancel").addEventListener("click", function () {
+    handover.close();
+  });
+  handoverForm.addEventListener("submit", function (event) {
+    event.preventDefault();
+    handoverError.hidden = true;
+    handoverNote.hidden = true;
+    var email = handoverEmail.value.trim().toLowerCase();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      handoverError.textContent = "Enter the new admin's email address.";
+      handoverError.hidden = false;
+      handoverEmail.focus();
+      return;
+    }
+    if (email === (me.user.email || "").toLowerCase()) {
+      handoverError.textContent = "That's your own email. Enter the new admin's.";
+      handoverError.hidden = false;
+      return;
+    }
+    if (!HANDOVER_ENABLED) {
+      handoverNote.hidden = false;
+      return;
+    }
+  });
+
   P.requireAuth().then(function (session) {
     me = session;
     P.fillDrawerUser();
+    document.getElementById("admin-card").hidden = !P.isAdmin();
     loadCounts();
     fillForm(me.profile);
     showProfile(me.profile);

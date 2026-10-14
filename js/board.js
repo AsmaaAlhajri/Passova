@@ -10,8 +10,8 @@
   function loadBoard() {
     var since = P.currentShiftStartISO();
     return Promise.all([
-      P.db.from("endorsements").select("*").gte("created_at", since).order("created_at"),
-      P.db.from("admissions").select("*").gte("created_at", since).order("created_at"),
+      P.db.from("endorsements").select("*").gte("created_at", since).is("deleted_at", null).order("created_at"),
+      P.db.from("admissions").select("*").gte("created_at", since).is("deleted_at", null).order("created_at"),
       P.db.from("orders").select("*").gte("created_at", since).order("created_at"),
       P.db.from("reminders").select("*").gte("created_at", since).order("created_at"),
       P.loadProfiles(),

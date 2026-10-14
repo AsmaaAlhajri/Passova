@@ -103,6 +103,9 @@
     endorse: svg('<path d="M9 3h6v4H9zM15 5h3a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h3M9 12h6M9 16h4"/>'),
     admit: svg('<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM19 8v6M22 11h-6"/>'),
     profile: svg('<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>'),
+    mail: svg('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>'),
+    history: svg('<path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 2"/>'),
+    shield: svg('<path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6Z"/><path d="m9 12 2 2 4-4"/>'),
     trophy: svg('<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4ZM7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3"/>'),
     signout: svg('<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>'),
     bell: svg('<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0"/>'),
@@ -166,7 +169,7 @@
   }
 
   function loadProfiles() {
-    return db.from("profiles").select("id, full_name, position, team, phone").then(function (res) {
+    return db.from("profiles").select("id, full_name, position, team, phone, is_admin").then(function (res) {
       if (res.error) throw res.error;
       res.data.forEach(function (p) { profiles[p.id] = p; });
       return profiles;
@@ -185,9 +188,25 @@
       }
       return loadProfiles().then(function () {
         me = { session: session, user: session.user, profile: profiles[session.user.id] || null };
+        if (isAdmin()) addAdminNav();
         document.body.classList.remove("auth-pending");
         return me;
       });
+    });
+  }
+
+  function isAdmin() {
+    return !!(me && me.profile && me.profile.is_admin);
+  }
+
+  // For admin-only pages: anyone else is sent back to the home page.
+  function requireAdmin() {
+    return requireAuth().then(function (session) {
+      if (!isAdmin()) {
+        window.location.replace("home.html");
+        return new Promise(function () {});
+      }
+      return session;
     });
   }
 
@@ -213,7 +232,28 @@
     { id: "profile", href: "profile.html", label: "My profile", icon: ICON.profile },
   ];
 
+  // Extra pages only the admin sees in the menu.
+  var ADMIN_NAV = [
+    { id: "approved", href: "approved-emails.html", label: "Approved emails", icon: ICON.mail },
+    { id: "history", href: "history.html", label: "History", icon: ICON.history },
+  ];
+  var activePage = null;
+
+  function addAdminNav() {
+    var nav = document.querySelector(".drawer nav");
+    if (!nav || nav.querySelector(".nav-admin")) return;
+    nav.appendChild(el("p", { class: "nav-admin", html: ICON.shield + "Admin" }));
+    ADMIN_NAV.forEach(function (item) {
+      nav.appendChild(el("a", {
+        href: item.href,
+        "aria-current": item.id === activePage ? "page" : null,
+        html: item.icon + item.label,
+      }));
+    });
+  }
+
   function renderShell(active) {
+    activePage = active;
     var scrim = el("div", { class: "scrim", id: "scrim" });
     var closeBtn = el("button", { class: "drawer-close", type: "button", "aria-label": "Close menu", html: ICON.close });
     var signOutLink = el("a", { href: "index.html", html: ICON.signout + "Sign out" });
@@ -275,7 +315,10 @@
       exit.addEventListener("click", signOut);
       document.body.insertBefore(el("div", { class: "demo-bar", role: "note" }, [
         el("span", { class: "demo-dot" }),
-        el("span", null, [el("strong", { text: "Demo mode" }), " · sample patients; nothing is saved to the real database."]),
+        el("span", null, [
+          el("strong", { text: window.PassovaDemo.isAdmin() ? "Admin demo" : "Demo mode" }),
+          " · sample patients; nothing is saved to the real database.",
+        ]),
         exit,
       ]), document.body.firstChild);
     }
@@ -308,6 +351,7 @@
     host.appendChild(el("div", null, [
       el("strong", { text: name }),
       el("span", { text: (me.profile && me.profile.position) || me.user.email }),
+      isAdmin() ? el("span", { class: "admin-badge", html: ICON.shield + "Admin" }) : null,
     ]));
   }
 
@@ -611,6 +655,8 @@
     toast: toast,
     errorMessage: errorMessage,
     requireAuth: requireAuth,
+    requireAdmin: requireAdmin,
+    isAdmin: isAdmin,
     renderShell: renderShell,
     fillDrawerUser: fillDrawerUser,
     signOut: signOut,

@@ -35,6 +35,19 @@
       </div>
     </section>
 
+    <section class="card admin-card" id="admin-card" aria-labelledby="admin-title" hidden>
+      <div class="admin-card-head">
+        <span class="admin-card-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6Z"/><path d="m9 12 2 2 4-4"/></svg>
+        </span>
+        <div>
+          <h2 class="stats-title" id="admin-title">You're the admin</h2>
+          <p class="section-sub">You approve who can sign up and can see the full history of endorsements and admissions.</p>
+        </div>
+      </div>
+      <button class="btn btn-ghost" type="button" id="step-down">Step down and hand over admin</button>
+    </section>
+
     <section class="card profile-card" aria-labelledby="profile-name">
       <div class="profile-hero">
         <span class="profile-avatar" id="profile-avatar">?</span>
@@ -92,6 +105,24 @@
       </form>
     </section>
   </main>
+
+  <!-- Hand over admin -->
+  <dialog class="dialog" id="handover-dialog" aria-labelledby="handover-title">
+    <form method="dialog" id="handover-form" novalidate>
+      <h2 id="handover-title">Hand over admin</h2>
+      <p class="hint">The new admin gets the Approved emails and History pages. You go back to being a regular doctor.</p>
+      <div class="field">
+        <label for="handover-email">New admin's email</label>
+        <input class="input" id="handover-email" type="email" inputmode="email" placeholder="name@hospital.kw" autocomplete="off">
+      </div>
+      <p class="form-error" id="handover-error" role="alert" hidden></p>
+      <p class="handover-note" id="handover-note" hidden>Handing over admin isn't switched on yet, so nothing has changed. It will work once it's activated.</p>
+      <div class="dialog-actions">
+        <button class="btn btn-ghost" type="button" id="handover-cancel">Cancel</button>
+        <button class="btn btn-primary" type="submit" id="handover-submit">Hand over</button>
+      </div>
+    </form>
+  </dialog>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"></script>
   <script src="js/config.js"></script>

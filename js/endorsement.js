@@ -298,7 +298,8 @@
           el("span", { class: "entered-time", text: " · " + P.formatHM(p.created_at) }),
         ]),
         mine ? P.ownerActions(function () { startEdit(p); }, "Remove", function () {
-          P.db.from("endorsements").delete().eq("id", p.id).then(function (res) {
+          // Removing hides the patient from everyone but keeps it in the admin's history.
+          P.db.rpc("remove_patient", { p_kind: "endorsement", p_id: p.id }).then(function (res) {
             if (res.error) {
               P.toast("Not removed", P.errorMessage(res.error), "error");
               return;

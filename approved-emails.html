@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Approved emails · Passova</title>
+  <meta name="description" content="Emails allowed to create a Passova account.">
+  <link rel="icon" href="assets/passova-logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="app-body auth-pending">
+
+  <main class="page narrow">
+    <div class="page-head">
+      <div>
+        <h1 class="page-title">Approved emails</h1>
+        <p class="section-sub">Only these emails can create a new account. Doctors who already have an account can always sign in.</p>
+      </div>
+    </div>
+
+    <section class="card form-card" aria-labelledby="add-title">
+      <form id="add-form" novalidate>
+        <h2 class="section-title" id="add-title">Approve doctors</h2>
+        <div class="field">
+          <label for="emails">Email addresses</label>
+          <textarea class="input" id="emails" rows="3" placeholder="name@hospital.kw&#10;You can paste several, one per line or separated by commas"></textarea>
+        </div>
+        <p class="form-error" id="form-error" role="alert" hidden></p>
+        <div class="form-actions">
+          <button class="btn btn-primary" type="submit" id="add-btn">Approve</button>
+        </div>
+      </form>
+    </section>
+
+    <section aria-labelledby="list-title">
+      <div class="list-head">
+        <h2 class="section-title" id="list-title">Approved <span class="count-pill" id="email-count">0</span></h2>
+        <input class="input search-input" id="search" type="search" placeholder="Search emails" aria-label="Search emails">
+      </div>
+      <ul class="email-list" id="email-list"></ul>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/demo.js"></script>
+  <script src="js/core.js"></script>
+  <script src="js/approved-emails.js"></script>
+</body>
+</html>

@@ -28,7 +28,15 @@
   var demoBtn = document.getElementById("demo-btn");
   if (demoBtn) {
     demoBtn.addEventListener("click", function () {
-      window.PassovaDemo.start();
+      window.PassovaDemo.start(false);
+      window.location.href = "home.html";
+    });
+  }
+
+  var adminDemoBtn = document.getElementById("demo-admin-btn");
+  if (adminDemoBtn) {
+    adminDemoBtn.addEventListener("click", function () {
+      window.PassovaDemo.start(true);
       window.location.href = "home.html";
     });
   }
@@ -49,6 +57,10 @@
     var msg = (error && error.message) || "";
     if (/invalid login credentials/i.test(msg)) return "That email and password do not match an account.";
     if (/email not confirmed/i.test(msg)) return "Please confirm your email first: open the link we sent you, then sign in.";
+    // The database refuses sign-ups from emails the admin hasn't approved.
+    if (/PASSOVA_EMAIL_NOT_APPROVED|database error saving new user/i.test(msg)) {
+      return "This email isn't approved to create an account. Ask the Passova admin to add it, then try again.";
+    }
     if (/already registered|already been registered/i.test(msg)) return "An account with this email already exists. Sign in instead.";
     if (/password should be at least/i.test(msg)) return "The password must be at least 6 characters.";
     if (/rate limit/i.test(msg)) return "Too many attempts. Please wait a few minutes and try again.";
